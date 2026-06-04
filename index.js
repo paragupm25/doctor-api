@@ -297,9 +297,14 @@ app.delete('/api/ai/en/appointments/:id', (req, res) => {
 });
 
 // GET /api/ai/en/appointments/patient/:email
+// Matches EXACT real API response structure from Postman collection
 app.get('/api/ai/en/appointments/patient/:email', (req, res) => {
+  const today = new Date();
+  const future1 = new Date(today); future1.setDate(today.getDate() + 5);
+  const future2 = new Date(today); future2.setDate(today.getDate() + 12);
+  const fmt = d => d.toISOString().split('T')[0];
+
   res.json({
-    success: true,
     appointments: [
       {
         appt_id: 306905,
@@ -308,12 +313,36 @@ app.get('/api/ai/en/appointments/patient/:email', (req, res) => {
         medical_service_id: 0,
         patient_user_id: 93607,
         temporary_patient: 0,
-        appt_date: new Date().toISOString().split('T')[0],
+        extra_appt_note: null,
+        temporary_patient_name: null,
+        temporary_patient_surname: '',
+        temporary_patient_phone: null,
+        appt_date: fmt(future1),
         visit_number: 1,
+        prescription: null,
+        patient_attended: 0,
         doctor_user_id: 93604,
-        doctor_name: 'Dr Razib Al Mamun',
-        specialization: 'Cardiologia',
+        slot_id: 615990,
         slot_time: '09:00:00'
+      },
+      {
+        appt_id: 306906,
+        appointments_from: 'AI',
+        spec_id: 9,
+        medical_service_id: 0,
+        patient_user_id: 93607,
+        temporary_patient: 0,
+        extra_appt_note: null,
+        temporary_patient_name: null,
+        temporary_patient_surname: '',
+        temporary_patient_phone: null,
+        appt_date: fmt(future2),
+        visit_number: 1,
+        prescription: null,
+        patient_attended: 0,
+        doctor_user_id: 80987,
+        slot_id: 615991,
+        slot_time: '13:30:00'
       }
     ]
   });

@@ -1,0 +1,4406 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>NCM Medical Assistant</title>
+    <style>
+      @import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap");
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+      body {
+        font-family: "Inter", sans-serif;
+        background: #f0f2f5;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 100vh;
+      }
+      .shell {
+        width: 460px;
+        height: 90vh;
+        max-height: 860px;
+        background: #f0f2f5;
+        border-radius: 20px;
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+        box-shadow: 0 8px 40px rgba(0, 0, 0, 0.12);
+      }
+      .hdr {
+        background: #fff;
+        padding: 12px 16px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        border-bottom: 1px solid #e4e6eb;
+        flex-shrink: 0;
+      }
+      .logo-wrap {
+        display: flex;
+        align-items: center;
+        flex-shrink: 0;
+      }
+      .logo-wrap img {
+        height: 34px;
+        width: auto;
+      }
+      .hdr-info {
+        flex: 1;
+        min-width: 0;
+      }
+      .hdr-title {
+        font-size: 14px;
+        font-weight: 600;
+        color: #1c1e21;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      .hdr-sub {
+        font-size: 11px;
+        color: #31a24c;
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        margin-top: 1px;
+      }
+      .dot {
+        width: 6px;
+        height: 6px;
+        background: #31a24c;
+        border-radius: 50%;
+        flex-shrink: 0;
+      }
+      .badge {
+        font-size: 10px;
+        padding: 3px 8px;
+        border-radius: 8px;
+        font-weight: 500;
+        white-space: nowrap;
+        flex-shrink: 0;
+        transition: all 0.3s;
+      }
+      .badge.verify {
+        background: #fff3cd;
+        color: #856404;
+        border: 1px solid #ffd86b;
+      }
+      .badge.ai {
+        background: #e6ffe6;
+        color: #1a7f37;
+        border: 1px solid #aaddaa;
+      }
+      .lang-btn {
+        background: #f0f2f5;
+        border: 1px solid #e4e6eb;
+        color: #65676b;
+        font-size: 11px;
+        padding: 4px 8px;
+        border-radius: 7px;
+        cursor: pointer;
+        font-family: inherit;
+        transition: all 0.15s;
+        flex-shrink: 0;
+      }
+      .lang-btn.on {
+        background: #e7f3ff;
+        border-color: #0084ff;
+        color: #0084ff;
+      }
+      .tabs {
+        display: flex;
+        background: #fff;
+        border-bottom: 1px solid #e4e6eb;
+        flex-shrink: 0;
+      }
+      .tab {
+        flex: 1;
+        padding: 10px;
+        font-size: 13px;
+        font-weight: 500;
+        border: none;
+        background: transparent;
+        color: #65676b;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+        border-bottom: 2px solid transparent;
+        transition: all 0.2s;
+        font-family: inherit;
+      }
+      .tab.active {
+        color: #0084ff;
+        border-bottom-color: #0084ff;
+        background: #f7fbff;
+      }
+      .tab svg {
+        width: 13px;
+        height: 13px;
+      }
+      .free-bar {
+        background: #f0f7ff;
+        border-bottom: 1px solid #c2d9ff;
+        padding: 6px 14px;
+        font-size: 11px;
+        color: #0072e6;
+        display: none;
+        align-items: center;
+        gap: 6px;
+        flex-shrink: 0;
+      }
+      .free-bar.show {
+        display: flex;
+      }
+      .free-dot {
+        width: 6px;
+        height: 6px;
+        background: #0084ff;
+        border-radius: 50%;
+        animation: p 1.2s infinite;
+      }
+      @keyframes p {
+        0%,
+        100% {
+          opacity: 1;
+          transform: scale(1);
+        }
+        50% {
+          opacity: 0.4;
+          transform: scale(0.8);
+        }
+      }
+      .chat-pane {
+        display: flex;
+        flex-direction: column;
+        flex: 1;
+        overflow: hidden;
+        min-height: 0;
+      }
+      .chat-pane.hidden {
+        display: none;
+      }
+      .msgs {
+        flex: 1;
+        overflow-y: auto;
+        padding: 14px 12px;
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+        background: #f0f2f5;
+      }
+      .msgs::-webkit-scrollbar {
+        width: 3px;
+      }
+      .msgs::-webkit-scrollbar-thumb {
+        background: #ccc;
+        border-radius: 2px;
+      }
+      .row {
+        display: flex;
+        align-items: flex-end;
+        gap: 8px;
+        margin-bottom: 3px;
+        animation: fu 0.25s ease;
+      }
+      .row.user {
+        flex-direction: row-reverse;
+      }
+      @keyframes fu {
+        from {
+          opacity: 0;
+          transform: translateY(7px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+      .av {
+        width: 30px;
+        height: 30px;
+        border-radius: 50%;
+        background: #fff;
+        border: 1px solid #e4e6eb;
+        flex-shrink: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 4px;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+      }
+      .av img {
+        width: 100%;
+        height: auto;
+        object-fit: contain;
+        border-radius: 2px;
+      }
+      .av.u {
+        background: #0084ff;
+        padding: 0;
+        font-size: 13px;
+        font-weight: 600;
+        color: #fff;
+      }
+      .bub {
+        max-width: 76%;
+        padding: 10px 14px;
+        border-radius: 18px;
+        word-break: break-word;
+        font-size: 14px;
+        line-height: 1.55;
+      }
+      .row.bot .bub {
+        background: #fff;
+        color: #1c1e21;
+        border-bottom-left-radius: 4px;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+      }
+      .row.user .bub {
+        background: #0084ff;
+        color: #fff;
+        border-bottom-right-radius: 4px;
+      }
+      .bub p {
+        white-space: pre-line;
+        margin: 0;
+      }
+      .ts {
+        font-size: 10px;
+        opacity: 0.45;
+        float: right;
+        margin-left: 8px;
+        margin-top: 4px;
+        display: block;
+      }
+      .typ-row {
+        display: flex;
+        gap: 8px;
+        align-items: flex-end;
+        margin-bottom: 3px;
+      }
+      .typ-av {
+        width: 30px;
+        height: 30px;
+        border-radius: 50%;
+        background: #e4e6eb;
+        flex-shrink: 0;
+      }
+      .typ-bub {
+        background: #fff;
+        padding: 11px 15px;
+        border-radius: 18px;
+        border-bottom-left-radius: 4px;
+        display: flex;
+        gap: 4px;
+        align-items: center;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+      }
+      .typ-bub span {
+        width: 6px;
+        height: 6px;
+        background: #b0b3b8;
+        border-radius: 50%;
+        animation: bo 1.4s infinite ease-in-out;
+      }
+      .typ-bub span:nth-child(2) {
+        animation-delay: 0.2s;
+      }
+      .typ-bub span:nth-child(3) {
+        animation-delay: 0.4s;
+      }
+      @keyframes bo {
+        0%,
+        60%,
+        100% {
+          transform: translateY(0);
+        }
+        30% {
+          transform: translateY(-5px);
+        }
+      }
+      .ai-row {
+        display: none;
+        margin: 3px 12px;
+        animation: fu 0.2s ease;
+      }
+      .ai-row.show {
+        display: flex;
+      }
+      .ai-bub {
+        background: #f0f7ff;
+        border: 1px solid #c2d9ff;
+        padding: 7px 12px;
+        border-radius: 12px;
+        font-size: 12px;
+        color: #0072e6;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+      }
+      .ai-dot {
+        width: 6px;
+        height: 6px;
+        background: #0084ff;
+        border-radius: 50%;
+        animation: p 1.2s infinite;
+        flex-shrink: 0;
+      }
+      .qrs {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 7px;
+        padding: 9px 12px;
+        background: #f8f9fa;
+        border-top: 1px solid #e4e6eb;
+        flex-shrink: 0;
+      }
+      .qr {
+        background: #fff;
+        border: 1.5px solid #0084ff;
+        color: #0084ff;
+        padding: 7px 14px;
+        border-radius: 20px;
+        font-size: 12.5px;
+        cursor: pointer;
+        font-family: inherit;
+        transition: all 0.15s;
+        font-weight: 500;
+      }
+      .qr:hover {
+        background: #0084ff;
+        color: #fff;
+      }
+      .chips {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+        padding: 8px 12px 4px;
+        background: #f8f9fa;
+        flex-shrink: 0;
+      }
+      .chip {
+        background: #fff;
+        border: 1px solid #e4e6eb;
+        color: #65676b;
+        padding: 6px 12px;
+        border-radius: 14px;
+        font-size: 12px;
+        cursor: pointer;
+        font-family: inherit;
+        transition: all 0.15s;
+      }
+      .chip:hover {
+        border-color: #0084ff;
+        color: #0084ff;
+        background: #f0f7ff;
+      }
+      .inp-area {
+        background: #fff;
+        padding: 10px 12px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        border-top: 1px solid #e4e6eb;
+        flex-shrink: 0;
+      }
+      .inp-wrap {
+        flex: 1;
+        background: #f0f2f5;
+        border-radius: 22px;
+        display: flex;
+        align-items: center;
+        padding: 9px 14px;
+        border: 1.5px solid transparent;
+        transition: border 0.2s;
+      }
+      .inp-wrap:focus-within {
+        border-color: #0084ff;
+        background: #fff;
+      }
+      .inp-wrap input {
+        flex: 1;
+        background: transparent;
+        border: none;
+        outline: none;
+        color: #1c1e21;
+        font-size: 14px;
+        font-family: inherit;
+      }
+      .inp-wrap input::placeholder {
+        color: #b0b3b8;
+      }
+      .inp-wrap input:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+      }
+      .send-btn {
+        width: 38px;
+        height: 38px;
+        border-radius: 50%;
+        background: #0084ff;
+        border: none;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.2s;
+        flex-shrink: 0;
+      }
+      .send-btn:hover {
+        background: #0072e6;
+        transform: scale(1.05);
+      }
+      .send-btn:disabled {
+        background: #e4e6eb;
+        cursor: not-allowed;
+        transform: none;
+      }
+      .mic-btn {
+        width: 38px;
+        height: 38px;
+        border-radius: 50%;
+        background: #f0f2f5;
+        border: 1.5px solid #e4e6eb;
+        color: #65676b;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.2s;
+        flex-shrink: 0;
+      }
+      .mic-btn:hover {
+        border-color: #0084ff;
+        color: #0084ff;
+      }
+      .mic-btn.on {
+        background: #ffdddd;
+        border-color: #dc2626;
+        color: #dc2626;
+        animation: mp 1s ease-in-out infinite;
+      }
+      @keyframes mp {
+        0%,
+        100% {
+          box-shadow: 0 0 0 0 rgba(220, 38, 38, 0.3);
+        }
+        50% {
+          box-shadow: 0 0 0 6px rgba(220, 38, 38, 0);
+        }
+      }
+      /* TALK PANE */
+      .talk-pane {
+        display: none;
+        flex-direction: column;
+        flex: 1;
+        overflow: hidden;
+        min-height: 0;
+      }
+      .talk-pane.show {
+        display: flex;
+      }
+      .talk-screen {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: space-between;
+        padding: 24px 20px 18px;
+        background: linear-gradient(160deg, #f0f7ff 0%, #f8f9fa 100%);
+      }
+      .talk-top {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 10px;
+        width: 100%;
+      }
+      .talk-av {
+        width: 82px;
+        height: 82px;
+        border-radius: 50%;
+        background: #fff;
+        border: 2px solid #e4e6eb;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
+        padding: 10px;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+      }
+      .talk-av img {
+        width: 100%;
+        height: auto;
+        object-fit: contain;
+      }
+      .talk-av.ring {
+        animation: rng 0.8s ease-in-out infinite alternate;
+      }
+      @keyframes rng {
+        from {
+          box-shadow: 0 0 0 0 rgba(0, 132, 255, 0.4);
+        }
+        to {
+          box-shadow: 0 0 0 16px rgba(0, 132, 255, 0);
+        }
+      }
+      .talk-name {
+        font-size: 19px;
+        font-weight: 600;
+        color: #1c1e21;
+        letter-spacing: -0.3px;
+      }
+      .talk-sub {
+        font-size: 11px;
+        color: #65676b;
+      }
+      .talk-st {
+        font-size: 13px;
+        font-weight: 500;
+        min-height: 20px;
+      }
+      .talk-st.idle {
+        color: #65676b;
+      }
+      .talk-st.connecting {
+        color: #6366f1;
+      }
+      .talk-st.live {
+        color: #16a34a;
+      }
+      .talk-st.thinking {
+        color: #d97706;
+      }
+      .talk-st.speaking {
+        color: #0084ff;
+      }
+      .talk-st.listening {
+        color: #dc2626;
+      }
+      .talk-st.ended {
+        color: #65676b;
+      }
+      .waves {
+        display: flex;
+        align-items: center;
+        gap: 3px;
+        height: 30px;
+        opacity: 0;
+        transition: opacity 0.3s;
+      }
+      .waves.show {
+        opacity: 1;
+      }
+      .waves .bar {
+        width: 3px;
+        background: #0084ff;
+        border-radius: 3px;
+        animation: wv 1.2s ease-in-out infinite;
+      }
+      .waves.red .bar {
+        background: #dc2626;
+      }
+      .waves .bar:nth-child(1) {
+        height: 8px;
+        animation-delay: 0s;
+      }
+      .waves .bar:nth-child(2) {
+        height: 18px;
+        animation-delay: 0.1s;
+      }
+      .waves .bar:nth-child(3) {
+        height: 12px;
+        animation-delay: 0.2s;
+      }
+      .waves .bar:nth-child(4) {
+        height: 24px;
+        animation-delay: 0.3s;
+      }
+      .waves .bar:nth-child(5) {
+        height: 14px;
+        animation-delay: 0.15s;
+      }
+      .waves .bar:nth-child(6) {
+        height: 20px;
+        animation-delay: 0.25s;
+      }
+      .waves .bar:nth-child(7) {
+        height: 10px;
+        animation-delay: 0.05s;
+      }
+      @keyframes wv {
+        0%,
+        100% {
+          transform: scaleY(1);
+          opacity: 0.6;
+        }
+        50% {
+          transform: scaleY(1.7);
+          opacity: 1;
+        }
+      }
+      .transcript {
+        width: 100%;
+        background: #fff;
+        border: 1px solid #e4e6eb;
+        border-radius: 16px;
+        padding: 12px 14px;
+        max-height: 210px;
+        overflow-y: auto;
+        flex-shrink: 0;
+        box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+      }
+      .transcript::-webkit-scrollbar {
+        width: 3px;
+      }
+      .transcript::-webkit-scrollbar-thumb {
+        background: #ccc;
+        border-radius: 2px;
+      }
+      .t-empty {
+        font-size: 12px;
+        color: #65676b;
+        text-align: center;
+      }
+      .t-line {
+        margin-bottom: 9px;
+        display: flex;
+        flex-direction: column;
+      }
+      .t-line.user {
+        align-items: flex-end;
+      }
+      .t-line:last-child {
+        margin-bottom: 0;
+      }
+      .t-spk {
+        font-size: 10px;
+        font-weight: 600;
+        color: #65676b;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-bottom: 3px;
+      }
+      .t-txt {
+        font-size: 13px;
+        line-height: 1.5;
+        padding: 7px 11px;
+        border-radius: 12px;
+        max-width: 85%;
+      }
+      .t-line.bot .t-txt {
+        background: #f0f2f5;
+        color: #1c1e21;
+        border-bottom-left-radius: 3px;
+      }
+      .t-line.user .t-txt {
+        background: #0084ff;
+        color: #fff;
+        border-bottom-right-radius: 3px;
+      }
+      .talk-ctrls {
+        display: flex;
+        align-items: flex-end;
+        gap: 20px;
+      }
+      .ctrl {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 6px;
+      }
+      .ctrl-lbl {
+        font-size: 10px;
+        color: #65676b;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+      }
+      .ctrl-btn {
+        border: none;
+        cursor: pointer;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 22px;
+        transition: all 0.2s;
+      }
+      .ctrl-btn.lg {
+        width: 68px;
+        height: 68px;
+      }
+      .ctrl-btn.sm {
+        width: 52px;
+        height: 52px;
+        background: #fff;
+        border: 1.5px solid #e4e6eb;
+        box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+      }
+      .ctrl-btn.sm:hover {
+        background: #f0f2f5;
+      }
+      .ctrl-btn.start {
+        background: #16a34a;
+        box-shadow: 0 4px 16px rgba(22, 163, 74, 0.35);
+      }
+      .ctrl-btn.start:hover {
+        background: #15803d;
+        transform: scale(1.06);
+      }
+      .ctrl-btn.end {
+        background: #dc2626;
+        box-shadow: 0 4px 16px rgba(220, 38, 38, 0.35);
+      }
+      .ctrl-btn.end:hover {
+        background: #b91c1c;
+        transform: scale(1.06);
+      }
+      .ctrl-btn.muted {
+        background: #ffdddd;
+        border-color: #dc2626;
+      }
+      .ctrl-btn.spk-off {
+        opacity: 0.45;
+      }
+      .talk-timer {
+        font-size: 13px;
+        color: #65676b;
+        font-variant-numeric: tabular-nums;
+        letter-spacing: 0.5px;
+      }
+      /* Cards */
+      .sec-title {
+        font-size: 11px;
+        font-weight: 600;
+        color: #65676b;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-bottom: 8px;
+      }
+      .appt-card {
+        background: #fff;
+        border: 1px solid #e4e6eb;
+        border-radius: 14px;
+        overflow: hidden;
+        margin-bottom: 8px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+      }
+      .appt-hdr {
+        background: linear-gradient(135deg, #1d4ed8, #1e40af);
+        padding: 11px 14px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+      .appt-hdr-icon {
+        font-size: 19px;
+      }
+      .appt-hdr-title {
+        color: #eff6ff;
+        font-size: 13px;
+        font-weight: 600;
+      }
+      .appt-hdr-sub {
+        color: rgba(239, 246, 255, 0.7);
+        font-size: 11px;
+        margin-top: 2px;
+      }
+      .appt-body {
+        padding: 2px 0;
+      }
+      .arow {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 7px 14px;
+        border-bottom: 1px solid #f0f2f5;
+      }
+      .arow:last-child {
+        border-bottom: none;
+      }
+      .al {
+        color: #65676b;
+        font-size: 11px;
+        font-weight: 500;
+        text-transform: uppercase;
+        letter-spacing: 0.3px;
+      }
+      .av2 {
+        color: #1c1e21;
+        font-weight: 600;
+        font-size: 12.5px;
+        text-align: right;
+      }
+      .cancel-btn {
+        width: 100%;
+        padding: 9px;
+        background: #fff5f5;
+        border: none;
+        border-top: 1px solid #ffe0e0;
+        color: #d93025;
+        font-size: 12px;
+        font-weight: 500;
+        cursor: pointer;
+        font-family: inherit;
+        transition: background 0.15s;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 5px;
+      }
+      .cancel-btn:hover {
+        background: #ffe8e8;
+      }
+      .conf-card {
+        background: #fff;
+        border: 1px solid #e4e6eb;
+        border-radius: 14px;
+        overflow: hidden;
+        margin: 8px 0;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+      }
+      .conf-hdr {
+        padding: 11px 14px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+      .conf-hdr.green {
+        background: linear-gradient(135deg, #047857, #065f46);
+      }
+      .conf-hdr.blue {
+        background: linear-gradient(135deg, #1d4ed8, #1e40af);
+      }
+      .conf-icon {
+        font-size: 19px;
+      }
+      .conf-title {
+        color: #ecfdf5;
+        font-size: 13px;
+        font-weight: 600;
+      }
+      .conf-sub {
+        color: rgba(236, 253, 245, 0.7);
+        font-size: 11px;
+        margin-top: 2px;
+      }
+      .conf-body {
+        padding: 2px 0;
+      }
+      .conf-hint {
+        font-size: 12px;
+        color: #65676b;
+        margin-top: 6px;
+      }
+      .slots-hdr {
+        font-size: 12px;
+        color: #65676b;
+        margin-bottom: 10px;
+        font-weight: 500;
+      }
+      .period-lbl {
+        font-size: 10px;
+        color: #65676b;
+        font-weight: 700;
+        letter-spacing: 0.6px;
+        text-transform: uppercase;
+        margin: 0 0 6px;
+      }
+      .slots-grid {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+        margin-bottom: 10px;
+      }
+      .slot-chip {
+        background: #f0f7ff;
+        border: 1.5px solid #c2d9ff;
+        color: #1c1e21;
+        padding: 7px 13px;
+        border-radius: 10px;
+        font-size: 12.5px;
+        cursor: pointer;
+        font-family: inherit;
+        transition: all 0.15s;
+      }
+      .slot-chip:hover {
+        background: #daeeff;
+        border-color: #0084ff;
+        transform: translateY(-1px);
+      }
+      .info-title {
+        font-size: 11px;
+        font-weight: 600;
+        color: #65676b;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-bottom: 8px;
+      }
+      .info-list {
+        background: #fff;
+        border: 1px solid #e4e6eb;
+        border-radius: 14px;
+        overflow: hidden;
+      }
+      .info-item {
+        padding: 8px 14px;
+        border-bottom: 1px solid #f0f2f5;
+        color: #1c1e21;
+        font-size: 13px;
+      }
+      .info-item:last-child {
+        border-bottom: none;
+      }
+      .success-wrap {
+        text-align: center;
+      }
+      .success-icon {
+        font-size: 36px;
+        margin-bottom: 8px;
+      }
+      .success-title {
+        font-size: 16px;
+        font-weight: 700;
+        color: #1c1e21;
+        margin-bottom: 12px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="shell">
+      <div class="hdr">
+        <div class="logo-wrap">
+          <a href="https://www.globusnet.it/en" target="_blank"
+            ><img
+              src="https://www.globusnet.it/wp-content/uploads/2020/10/globus-logo.png"
+              alt="Globus"
+          /></a>
+        </div>
+        <div class="hdr-info">
+          <div class="hdr-title">NCM Medical Assistant</div>
+          <div class="hdr-sub"><span class="dot"></span>Online</div>
+        </div>
+        <button class="lang-btn on" id="langEN" onclick="setLang('en')">
+          🇬🇧 EN
+        </button>
+        <button class="lang-btn" id="langIT" onclick="setLang('it')">
+          🇮🇹 IT
+        </button>
+        <div class="badge verify" id="badge">Verification</div>
+      </div>
+      <div class="tabs">
+        <button class="tab active" id="tabChat" onclick="switchTab('chat')">
+          <svg viewBox="0 0 24 24" fill="currentColor">
+            <path
+              d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"
+            /></svg
+          >Chat
+        </button>
+        <button class="tab" id="tabTalk" onclick="switchTab('talk')">
+          <svg viewBox="0 0 24 24" fill="currentColor">
+            <path
+              d="M6.6 10.8c1.4 2.8 3.8 5.1 6.6 6.6l2.2-2.2c.3-.3.7-.4 1-.2 1.1.4 2.3.6 3.6.6.6 0 1 .4 1 1V20c0 .6-.4 1-1 1-9.4 0-17-7.6-17-17 0-.6.4-1 1-1h3.5c.6 0 1 .4 1 1 0 1.3.2 2.5.6 3.6.1.3 0 .7-.2 1L6.6 10.8z"
+            /></svg
+          >Talk
+        </button>
+      </div>
+      <div class="free-bar" id="freeBar">
+        <div class="free-dot"></div>
+        <span id="freeTxt">AI Assistant active — ask me anything</span>
+      </div>
+      <div class="chat-pane" id="chatPane">
+        <div class="msgs" id="msgs"></div>
+        <div class="chips" id="chips" style="display: none"></div>
+        <div class="ai-row" id="aiRow">
+          <div class="ai-bub">
+            <div class="ai-dot"></div>
+            <span id="aiTxt">Processing...</span>
+          </div>
+        </div>
+        <div class="qrs" id="qrs" style="display: none"></div>
+        <div class="inp-area">
+          <button class="mic-btn" id="micBtn" onclick="toggleMic()">
+            <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16">
+              <path
+                d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3zm5-3c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.93V21h2v-3.07c3.39-.5 6-3.4 6-6.93h-2z"
+              />
+            </svg>
+          </button>
+          <div class="inp-wrap">
+            <input
+              id="inp"
+              placeholder="Type a message..."
+              autocomplete="off"
+            />
+          </div>
+          <button class="send-btn" id="sendBtn" onclick="doSend()">
+            <svg viewBox="0 0 24 24" fill="white" width="16" height="16">
+              <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z" />
+            </svg>
+          </button>
+        </div>
+      </div>
+      <div class="talk-pane" id="talkPane">
+        <div class="talk-screen">
+          <div class="talk-top">
+            <div class="talk-av" id="talkAv">
+              <img
+                src="https://www.globusnet.it/wp-content/uploads/2020/10/globus-logo.png"
+                alt="NCM"
+              />
+            </div>
+            <div class="talk-name">NCM Medical Assistant</div>
+            <div class="talk-sub" id="talkSub">AI Booking Line</div>
+            <div class="talk-st idle" id="talkSt">Ready to talk</div>
+            <div class="waves" id="waves">
+              <div class="bar"></div>
+              <div class="bar"></div>
+              <div class="bar"></div>
+              <div class="bar"></div>
+              <div class="bar"></div>
+              <div class="bar"></div>
+              <div class="bar"></div>
+            </div>
+          </div>
+          <div class="transcript" id="transcript">
+            <div class="t-empty" id="tEmpty">Press Talk to start</div>
+          </div>
+          <div id="ctrlIdle" class="talk-ctrls">
+            <div class="ctrl">
+              <button class="ctrl-btn lg start" onclick="startTalk()">
+                📞
+              </button>
+              <div class="ctrl-lbl" id="startLbl">Talk</div>
+            </div>
+          </div>
+          <div id="ctrlLive" class="talk-ctrls" style="display: none">
+            <div class="ctrl">
+              <button class="ctrl-btn sm" id="muteBtn" onclick="toggleMute()">
+                🎙️
+              </button>
+              <div class="ctrl-lbl" id="muteLbl">Mute</div>
+            </div>
+            <div class="ctrl">
+              <button class="ctrl-btn lg end" onclick="endTalk()">📵</button>
+              <div class="ctrl-lbl" id="endLbl">End</div>
+            </div>
+            <div class="ctrl">
+              <button class="ctrl-btn sm" id="spkBtn" onclick="toggleSpk()">
+                🔊
+              </button>
+              <div class="ctrl-lbl" id="spkLbl">Speaker</div>
+            </div>
+          </div>
+          <div class="talk-timer" id="talkTimer" style="display: none">
+            00:00
+          </div>
+        </div>
+      </div>
+    </div>
+    <script>
+      // ═══════════════════════════════════════════════════════════════════
+      // FILE:// CHECK — mic never works from file://, warn user immediately
+      // ═══════════════════════════════════════════════════════════════════
+      if (location.protocol === "file:") {
+        document.addEventListener("DOMContentLoaded", () => {
+          const warn = document.createElement("div");
+          warn.style.cssText =
+            "position:fixed;top:0;left:0;right:0;background:#d93025;color:#fff;padding:10px 16px;font-size:13px;font-family:Inter,sans-serif;z-index:9999;display:flex;align-items:center;justify-content:space-between;gap:12px;box-shadow:0 2px 8px rgba(0,0,0,.3)";
+          warn.innerHTML = `<span>⚠️ <strong>Microphone won't work from a file.</strong> Run a local server: open terminal in this folder and run <code style="background:rgba(255,255,255,.2);padding:2px 6px;border-radius:4px">python -m http.server 8080</code> then open <strong>http://localhost:8080</strong></span><button onclick="this.parentElement.remove()" style="background:transparent;border:1px solid rgba(255,255,255,.5);color:#fff;padding:4px 10px;border-radius:6px;cursor:pointer;font-size:12px;white-space:nowrap">Dismiss</button>`;
+          document.body.prepend(warn);
+        });
+      }
+
+      // ═══════════════════════════════════════════════════════════════════
+      // CONFIG
+      // ═══════════════════════════════════════════════════════════════════
+      const GROQ_KEY =
+        "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";
+      const MEDICAL_API = "https://doctor-api-qgcn.onrender.com";
+      const BEARER =
+        "Bearer 2a12j6lJRuGKlM1Uoezm3bNgneIYsFwAB2sxP3qt62iZ5dygryWXe6K";
+
+      // ── Model strategy (best model for each purpose) ─────────────────
+      // GPT-OSS 120B  → main agent reasoning (best available on Groq)
+      // Llama 4 Scout → fast NLP extraction (phone, otp, date, confirm)
+      // Llama 3.3 70B → doctor/spec NLP matching (medical knowledge)
+      const M = {
+        agent: "openai/gpt-oss-120b", // main conversation + decisions
+        nlp: "meta-llama/llama-4-scout-17b-16e-instruct", // fast extraction
+        medical: "llama-3.3-70b-versatile", // doctor/spec matching (medical vocab)
+      };
+
+      // ═══════════════════════════════════════════════════════════════════
+      // LANGUAGE
+      // ═══════════════════════════════════════════════════════════════════
+      let lang = "en";
+      const L = {
+        en: {
+          ttsLang: "en-US",
+          sttLang: "en-US",
+          freeBar: "AI Assistant active — ask me anything",
+          talkSub: "AI Booking Line",
+          startLbl: "Talk",
+          endLbl: "End",
+          muteLbl: "Mute",
+          unmuteLbl: "Unmute",
+          spkLbl: "Speaker",
+          spkOffLbl: "Spk off",
+          readyToTalk: "Ready to talk",
+          connecting: "Connecting...",
+          connected: "Connected",
+          muted: "Muted",
+          talkEnded: "Talk ended",
+          pressToStart: "Press Talk to start",
+        },
+        it: {
+          ttsLang: "it-IT",
+          sttLang: "it-IT",
+          freeBar: "Assistente AI attivo — chiedi pure",
+          talkSub: "Linea Prenotazioni AI",
+          startLbl: "Parla",
+          endLbl: "Fine",
+          muteLbl: "Muto",
+          unmuteLbl: "Riattiva",
+          spkLbl: "Altoparlante",
+          spkOffLbl: "Alt. off",
+          readyToTalk: "Pronto per parlare",
+          connecting: "Connessione...",
+          connected: "Connesso",
+          muted: "Muto",
+          talkEnded: "Chiamata terminata",
+          pressToStart: "Premi Parla per iniziare",
+        },
+      };
+      const l = (k) => L[lang][k] || L["en"][k];
+
+      function setLang(v) {
+        lang = v;
+        document.getElementById("langEN").classList.toggle("on", v === "en");
+        document.getElementById("langIT").classList.toggle("on", v === "it");
+        document.getElementById("freeTxt").textContent = l("freeBar");
+        document.getElementById("talkSub").textContent = l("talkSub");
+        document.getElementById("startLbl").textContent = l("startLbl");
+        document.getElementById("endLbl").textContent = l("endLbl");
+        document.getElementById("muteLbl").textContent = l("muteLbl");
+        document.getElementById("spkLbl").textContent = l("spkLbl");
+        if (chatRecog) chatRecog.lang = l("sttLang");
+        if (talkRecog) talkRecog.lang = l("sttLang");
+        if (!talkActive) {
+          document.getElementById("talkSt").textContent = l("readyToTalk");
+          document.getElementById("tEmpty").textContent = l("pressToStart");
+        }
+      }
+
+      // ═══════════════════════════════════════════════════════════════════
+      // STATE — full conversation context for the AI agent
+      // ═══════════════════════════════════════════════════════════════════
+      const S = {
+        // identity
+        phone: "",
+        otp: "",
+        otpAttempts: 0,
+        otpSent: false,
+        userId: null,
+        userEmail: "",
+        userName: "",
+        userLastName: "",
+        verified: false,
+        // booking
+        forOther: false,
+        patName: "",
+        patLast: "",
+        patPhone: "",
+        findBy: "",
+        docId: null,
+        docName: "",
+        specId: null,
+        specName: "",
+        prefDate: "",
+        slotId: null,
+        slotDate: "",
+        slotTime: "",
+        slotOpts: [],
+        doctors: [],
+        specs: [],
+        appts: [],
+        // conversation
+        freeMode: false,
+        step: "collect_phone",
+        // context for agent — what the agent knows
+        lastDoctorFilter: null, // last spec filter user asked about
+        shownDoctors: [], // doctors shown to user
+      };
+
+      // ═══════════════════════════════════════════════════════════════════
+      // DOM
+      // ═══════════════════════════════════════════════════════════════════
+      const msgsEl = document.getElementById("msgs"),
+        qrsEl = document.getElementById("qrs"),
+        chipsEl = document.getElementById("chips");
+      const aiRowEl = document.getElementById("aiRow"),
+        aiTxtEl = document.getElementById("aiTxt");
+      const inp = document.getElementById("inp"),
+        sendBtn = document.getElementById("sendBtn"),
+        micBtnEl = document.getElementById("micBtn");
+      const badgeEl = document.getElementById("badge"),
+        freeBar = document.getElementById("freeBar");
+      let typingEl = null;
+      const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+      const now = () =>
+        new Date().toLocaleTimeString([], {
+          hour: "2-digit",
+          minute: "2-digit",
+        });
+      const todayStr = () => new Date().toISOString().split("T")[0];
+      const fmtDate = (d) =>
+        new Date(d + "T00:00:00").toLocaleDateString(
+          lang === "it" ? "it-IT" : "en-GB",
+          { weekday: "long", day: "numeric", month: "long", year: "numeric" },
+        );
+
+      // ── Speak digits one by one (e.g. phone, OTP) ───────────────────
+      function spellDigits(str) {
+        return str
+          .split("")
+          .map((c) => {
+            if (c === "+") return lang === "it" ? "più" : "plus";
+            if (c === " " || c === "-") return "";
+            return c;
+          })
+          .filter(Boolean)
+          .join(" ");
+      }
+
+      // ── Clean HTML for TTS ───────────────────────────────────────────
+      function cleanForSpeech(text, isHtml = false) {
+        let s = isHtml
+          ? text
+              .replace(/<button[^>]*>[\s\S]*?<\/button>/gi, "")
+              .replace(/<[^>]+>/g, " ")
+          : text;
+        // Remove UI-only strings
+        s = s
+          .replace(/Type "yes".*?\./gi, "")
+          .replace(/Scrivi "sì".*?\./gi, "")
+          .replace(/Select a time.*?\./gi, "")
+          .replace(/Seleziona un orario.*?\./gi, "")
+          .replace(/Would you like to continue\?/gi, "")
+          .replace(/Vuoi continuare\?/gi, "");
+        // Booking IDs — just say "confirmed" not the number
+        s = s.replace(/#\d{4,}/g, lang === "it" ? "confermato" : "confirmed");
+        // Dates YYYY-MM-DD → readable
+        s = s.replace(/\b(\d{4})-(\d{2})-(\d{2})\b/g, (m, y, mo, d) => {
+          const mEN = [
+            "January",
+            "February",
+            "March",
+            "April",
+            "May",
+            "June",
+            "July",
+            "August",
+            "September",
+            "October",
+            "November",
+            "December",
+          ];
+          const mIT = [
+            "gennaio",
+            "febbraio",
+            "marzo",
+            "aprile",
+            "maggio",
+            "giugno",
+            "luglio",
+            "agosto",
+            "settembre",
+            "ottobre",
+            "novembre",
+            "dicembre",
+          ];
+          return `${parseInt(d)} ${lang === "it" ? mIT[parseInt(mo) - 1] : mEN[parseInt(mo) - 1]} ${y}`;
+        });
+        // Times HH:MM
+        s = s.replace(/\b(\d{1,2}):(\d{2})\b/g, (m, h, min) => {
+          if (min === "00")
+            return lang === "it"
+              ? `le ${parseInt(h)}`
+              : `${parseInt(h)} o'clock`;
+          return lang === "it"
+            ? `le ${parseInt(h)} e ${min}`
+            : `${parseInt(h)} ${min}`;
+        });
+        // Phone numbers — spell as digits
+        s = s.replace(/\+?\d[\d\s\-]{7,}\d/g, (m) =>
+          spellDigits(m.replace(/\s/g, "")),
+        );
+        // Strip ALL emojis — they sound terrible in TTS
+        s = s.replace(/[\u{1F000}-\u{1FFFF}\u{2600}-\u{27FF}\u{2300}-\u{23FF}\u{2B00}-\u{2BFF}\u{FE00}-\u{FE0F}]/gu, " ");
+        // Strip bullet characters and markdown symbols
+        s = s.replace(/[•·▸▹►▻▼▽◆◇★☆]/g, " ");
+        // Clean up multiple spaces
+        return s.replace(/\s+/g, " ").trim();
+      }
+
+      function addMsg(text, who = "bot", html = false) {
+        const row = document.createElement("div");
+        row.className = `row ${who}`;
+        const av = document.createElement("div");
+        if (who === "bot") {
+          av.className = "av";
+          av.innerHTML = `<img src="https://www.globusnet.it/wp-content/uploads/2020/10/globus-logo.png"/>`;
+        } else {
+          av.className = "av u";
+          av.textContent = S.userName ? S.userName[0].toUpperCase() : "👤";
+        }
+        const bub = document.createElement("div");
+        bub.className = "bub";
+        const content = html
+          ? text
+          : `<p>${(text || "")
+              .replace(/\n/g, "<br>")
+              .replace(
+                /(?<!&lt;br)(?<!&)(?<!=)<(?!br)(?!\/)(?![a-zA-Z])/g,
+                "&lt;",
+              )
+              .replace(/(?<=[a-zA-Z0-9"';])>(?![^<]*<\/)/g, "&gt;")}</p>`;
+        bub.innerHTML = html ? text : `<p>${esc(text)}</p>`;
+        bub.innerHTML += `<span class="ts">${now()}</span>`;
+        if (html) setTimeout(() => wireHtml(bub), 0);
+        row.appendChild(av);
+        row.appendChild(bub);
+        msgsEl.appendChild(row);
+        msgsEl.scrollTop = msgsEl.scrollHeight;
+      }
+
+      function esc(t) {
+        return (t || "")
+          .replace(/&/g, "&amp;")
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;")
+          .replace(/\n/g, "<br>");
+      }
+
+      function wireHtml(el) {
+        el.querySelectorAll(".slot-chip").forEach((b) => {
+          b.onclick = () => {
+            if (S.step !== "select_slot") return;
+            addMsg(
+              `${b.dataset.date} at ${b.dataset.time.substring(0, 5)}`,
+              "user",
+            );
+            hideChips();
+            pickSlot(
+              parseInt(b.dataset.slotId),
+              b.dataset.date,
+              b.dataset.time,
+            );
+          };
+        });
+        el.querySelectorAll(".cancel-btn").forEach((b) => {
+          b.onclick = () => {
+            const id = parseInt(b.dataset.apptId),
+              date = b.dataset.date;
+            if (
+              id &&
+              confirm(
+                lang === "it"
+                  ? `Annullare l'appuntamento del ${date}?`
+                  : `Cancel appointment on ${date}?`,
+              )
+            )
+              cancelAppt(id, date);
+          };
+        });
+      }
+
+      async function botReply(text, html = false, delay = 700) {
+        showTyp();
+        await sleep(delay);
+        hideTyp();
+        addMsg(text, "bot", html);
+      }
+      function showTyp() {
+        if (typingEl) return;
+        typingEl = document.createElement("div");
+        typingEl.className = "typ-row";
+        typingEl.innerHTML = `<div class="typ-av"></div><div class="typ-bub"><span></span><span></span><span></span></div>`;
+        msgsEl.appendChild(typingEl);
+        msgsEl.scrollTop = msgsEl.scrollHeight;
+      }
+      function hideTyp() {
+        if (typingEl) {
+          typingEl.remove();
+          typingEl = null;
+        }
+      }
+      function showAI(t) {
+        aiRowEl.classList.add("show");
+        aiTxtEl.textContent = t;
+      }
+      function hideAI() {
+        aiRowEl.classList.remove("show");
+      }
+      function showQRs(opts) {
+        qrsEl.innerHTML = "";
+        if (!opts?.length) {
+          qrsEl.style.display = "none";
+          return;
+        }
+        qrsEl.style.display = "flex";
+        opts.forEach((o) => {
+          const b = document.createElement("button");
+          b.className = "qr";
+          const lbl = typeof o === "string" ? o : o.label,
+            val = typeof o === "string" ? o : o.value;
+          b.textContent = lbl;
+          b.onclick = () => onQR(val, lbl);
+          qrsEl.appendChild(b);
+        });
+        setEnabled(false);
+      }
+      function hideQRs() {
+        qrsEl.style.display = "none";
+        qrsEl.innerHTML = "";
+      }
+      function showChips(items) {
+        chipsEl.innerHTML = "";
+        if (!items?.length) {
+          chipsEl.style.display = "none";
+          return;
+        }
+        chipsEl.style.display = "flex";
+        items.forEach((txt) => {
+          const b = document.createElement("button");
+          b.className = "chip";
+          b.textContent = txt;
+          b.onclick = () => {
+            addMsg(txt, "user");
+            hideChips();
+            onQR(txt, txt);
+          };
+          chipsEl.appendChild(b);
+        });
+      }
+      function hideChips() {
+        chipsEl.style.display = "none";
+        chipsEl.innerHTML = "";
+      }
+      function setEnabled(on) {
+        inp.disabled = !on;
+        sendBtn.disabled = !on;
+        inp.placeholder = on
+          ? S.freeMode
+            ? l("freeBar")
+            : "Type a message..."
+          : "Select an option above...";
+      }
+      function enterFreeMode() {
+        S.freeMode = true;
+        badgeEl.textContent = "AI";
+        badgeEl.className = "badge ai";
+        freeBar.classList.add("show");
+        document.getElementById("freeTxt").textContent = l("freeBar");
+      }
+
+      // ═══════════════════════════════════════════════════════════════════
+      // TTS — smart, natural speech
+      // ═══════════════════════════════════════════════════════════════════
+      let ttsQ = [],
+        ttsRunning = false;
+
+      function speak(text, isHtml = false) {
+        if (!window.speechSynthesis) return;
+        const clean = cleanForSpeech(text, isHtml);
+        if (!clean || clean.length < 2) return;
+        ttsQ.push(clean);
+        if (!ttsRunning) runTTS();
+      }
+
+      function runTTS() {
+        if (!ttsQ.length) {
+          ttsRunning = false;
+          return;
+        }
+        ttsRunning = true;
+        const text = ttsQ.shift();
+        window.speechSynthesis.cancel();
+        const u = new SpeechSynthesisUtterance(text);
+        u.lang = l("ttsLang");
+        u.rate = 0.92;
+        u.pitch = 1.0;
+        const vs = window.speechSynthesis.getVoices();
+        let pref;
+        if (lang === "it")
+          pref =
+            vs.find((v) => v.name === "Google italiano") ||
+            vs.find(
+              (v) => v.lang.startsWith("it") && v.name.includes("Google"),
+            ) ||
+            vs.find((v) => v.lang.startsWith("it"));
+        else
+          pref =
+            vs.find((v) => v.name === "Google UK English Female") ||
+            vs.find((v) => v.name.includes("Google") && v.lang === "en-GB") ||
+            vs.find(
+              (v) => v.name.includes("Google") && v.lang.startsWith("en"),
+            ) ||
+            vs.find((v) => v.lang.startsWith("en-GB")) ||
+            vs.find((v) => v.lang.startsWith("en"));
+        if (pref) u.voice = pref;
+        u.onend = () => setTimeout(runTTS, 80);
+        u.onerror = () => {
+          ttsRunning = false;
+        };
+        window.speechSynthesis.speak(u);
+      }
+
+      // ═══════════════════════════════════════════════════════════════════
+      // GROQ — 3 models for 3 purposes
+      // ═══════════════════════════════════════════════════════════════════
+      async function groq(model, sys, user, maxTok = 150) {
+        try {
+          const r = await fetch(
+            "https://api.groq.com/openai/v1/chat/completions",
+            {
+              method: "POST",
+              headers: {
+                Authorization: `Bearer ${GROQ_KEY}`,
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({
+                model,
+                messages: [
+                  { role: "system", content: sys },
+                  { role: "user", content: user },
+                ],
+                max_tokens: maxTok,
+                temperature: 0.1,
+              }),
+            },
+          );
+          const d = await r.json();
+          return d.choices?.[0]?.message?.content?.trim() || null;
+        } catch (e) {
+          return null;
+        }
+      }
+
+      // ── Fast NLP extraction (Llama 4 Scout) ───────────────────────────
+      async function extractPhone(text) {
+        const r = await groq(
+          M.nlp,
+          `Extract phone number. Remove spaces/dashes. Keep + or convert 0039→+39. Return ONLY the number or NONE.`,
+          text,
+          20,
+        );
+        return r && r !== "NONE" && r.replace(/\D/g, "").length >= 7 ? r : null;
+      }
+
+      async function extractOTP(text) {
+        const r = await groq(
+          M.nlp,
+          `Extract a 6-digit verification code from the message. Remove spaces. Return ONLY 6 digits or NONE.`,
+          text,
+          15,
+        );
+        const c = r?.replace(/\D/g, "") || "";
+        return c.length === 6 ? c : null;
+      }
+
+      async function extractDate(text) {
+        const td = todayStr();
+        const r = await groq(
+          M.nlp,
+          `Convert to YYYY-MM-DD. Today=${td}. "asap"/"soonest"/"earliest"/"il prima possibile"/"subito"=today. Return ONLY date or NONE.`,
+          text,
+          15,
+        );
+        return r && r !== "NONE" && /^\d{4}-\d{2}-\d{2}$/.test(r) ? r : null;
+      }
+
+      async function extractConfirm(text) {
+        const r = await groq(
+          M.nlp,
+          `Is user confirming/agreeing? sì/si/yes/sure/ok/yep/certo/esatto=yes. no/cancel/nope/annulla=no. Reply ONLY: yes no unclear.`,
+          text,
+          8,
+        );
+        return r === "yes" || r === "no" ? r : "unclear";
+      }
+
+      async function extractForWho(text) {
+        const r = await groq(
+          M.nlp,
+          `Is user booking for themselves or someone else? "for me"/"per me"/"myself"=self. "for my wife/son/friend/someone else"/"per mio/mia"=other. Reply ONLY: self other unclear.`,
+          text,
+          8,
+        );
+        return r === "self" || r === "other" ? r : "unclear";
+      }
+
+      // ── Medical NLP matching (Llama 3.3 70B — best medical vocab) ─────
+      async function matchDoctorOrSpec(text) {
+        if (!S.doctors.length) return null;
+        const dList = S.doctors
+          .map(
+            (d) =>
+              `DOCTOR:${d.user_id}|${d.doctor_title} ${d.doctor_first_name} ${d.doctor_last_name}`,
+          )
+          .join("\n");
+        const sList = S.specs
+          .map((s) => `SPEC:${s.spec_id}|${s.spec_name}`)
+          .join("\n");
+        const sys = `You are a medical NLP system. Match natural language to doctors or specialisations.
+
+SYNONYM MAP (use this to match):
+heart/cardiac/cardiologist/chest pain → Cardiologia
+skin/dermatologist/rash/acne/eczema → Dermatologia
+child/children/kids/pediatrician/paediatrician/bambini → Pediatria
+eye/vision/ophthalmologist/occhio/vista → oculistica
+ear/nose/throat/ENT/otorinolaringoiatra → Otorinolaringoiatria
+teeth/dental/dentist/denti → odontoiatria
+bone/joint/orthopedic/knee/back pain/ortopedico → Ortopedia
+brain/neuro/neurologist/headache/epilepsy/cervello → Neurologia
+stomach/gastro/digestion/colon/intestino → Gastroenterologia
+diet/nutrition/weight/dietitian/nutrizionista/dieta → Dietologia/Nutrizionista
+urology/kidney/bladder/prostate/urologo → Urologia
+lung/breathing/respiratory/pulmonologist/polmone → Pneumologia
+mental/psychology/anxiety/depression/psicologia/psicoterapia → Psicologia e psicoterapia
+vein/vascular/circulation/varices/vene → Angiologia e Flebologia
+cancer/oncology/tumor/tumore → Oncologia
+pain/chronic pain/dolore cronico → Terapia del Dolore
+sport/athlete/sports medicine/medicina sportiva → Medicina dello Sport
+ultrasound/echo/scan/ecografia → Ecografia
+blood test/blood work/analisi/prelievo → Prelievi ematici
+elderly/geriatric/anziani → Geriatria
+gynecology/women/ginecologo/donna → Ginecologia
+surgery/operation/chirurgo/operazione → Chirurgia generale
+nurse/injection/infermiere/flebo → Servizi infermieristici
+
+Doctors:\n${dList}\n\nSpecialisations:\n${sList}
+
+Return ONLY: DOCTOR:user_id OR SPEC:spec_id OR NONE`;
+        const r = await groq(M.medical, sys, text, 20);
+        if (!r || r === "NONE") return null;
+        if (r.startsWith("DOCTOR:")) {
+          const id = parseInt(r.replace("DOCTOR:", ""));
+          return { type: "doctor", id: isNaN(id) ? null : id };
+        }
+        if (r.startsWith("SPEC:")) {
+          const id = parseInt(r.replace("SPEC:", ""));
+          return { type: "spec", id: isNaN(id) ? null : id };
+        }
+        return null;
+      }
+
+      // ── Main AI agent (GPT-OSS 120B) ───────────────────────────────────
+      // This is the brain — handles full conversational understanding
+      async function agentDecide(userText, conversationContext) {
+        const docList = S.doctors
+          .slice(0, 20)
+          .map(
+            (d) =>
+              `ID:${d.user_id} ${d.doctor_title} ${d.doctor_first_name} ${d.doctor_last_name}`,
+          )
+          .join(", ");
+        const specList = S.specs.map((s) => s.spec_name).join(", ");
+        const apptSummary = S.appts.length
+          ? S.appts
+              .slice(0, 3)
+              .map((a) => {
+                const doc = S.doctors.find(
+                  (d) => d.user_id === a.doctor_user_id,
+                );
+                return `#${a.appt_id} ${a.appt_date} ${(a.slot_time || "").substring(0, 5)} with ${doc ? `${doc.doctor_title} ${doc.doctor_last_name}` : "doctor"}`;
+              })
+              .join("; ")
+          : "none";
+
+        const sys = `You are a smart medical receptionist AI agent for NCM Misericordia di Badia, Italy.
+Current state:
+- User: ${S.userName ? `${S.userName} ${S.userLastName}` : "not identified yet"}
+- Phone verified: ${S.verified ? "yes" : "no"}
+- Step: ${S.step}
+- Free mode: ${S.freeMode}
+- Selected doctor: ${S.docName || "none"}
+- Selected spec: ${S.specName || "none"}
+- Appointments: ${apptSummary}
+- Available doctors: ${docList || "not loaded"}
+- Available specs: ${specList || "not loaded"}
+- Language: ${lang}
+
+RULES:
+1. Understand any natural language — the user may ask ANYTHING
+2. If user asks to resend OTP / didn't receive code → action: resend_otp
+3. If user asks about doctors of a category → action: filter_doctors, extract the category
+4. If user asks to see all doctors → action: show_doctors
+5. If user asks to see appointments → action: show_appointments
+6. If user asks to book → action: start_booking
+7. If user wants to cancel → action: show_appointments_cancel
+8. For booking step guidance, just respond naturally and set action: continue_flow
+9. NEVER say you are an AI
+
+Respond in JSON only:
+{
+  "action": "continue_flow|resend_otp|filter_doctors|show_doctors|show_appointments|show_appointments_cancel|start_booking|end",
+  "filter_category": "optional — the specialisation category if filtering",
+  "reply": "what to say to the user (natural, warm, concise)",
+  "speak_reply": "shorter version for TTS (no button labels, no hints, just the key info)"
+}`;
+
+        const r = await groq(
+          M.agent,
+          sys,
+          conversationContext
+            ? `Conversation so far:\n${conversationContext}\n\nUser just said: "${userText}"`
+            : `User said: "${userText}"`,
+          300,
+        );
+        try {
+          return JSON.parse(r || "{}");
+        } catch {
+          return {
+            action: "continue_flow",
+            reply: r || "I'm here to help.",
+            speak_reply: r || "I'm here to help.",
+          };
+        }
+      }
+
+      // ═══════════════════════════════════════════════════════════════════
+      // API
+      // ═══════════════════════════════════════════════════════════════════
+      const api = async (method, path, body) => {
+        const r = await fetch(MEDICAL_API + path, {
+          method,
+          headers: {
+            Authorization: BEARER,
+            "Content-Type": "application/json",
+          },
+          ...(body ? { body: JSON.stringify(body) } : {}),
+        });
+        return r.json();
+      };
+
+      // ═══════════════════════════════════════════════════════════════════
+      // CONVERSATION HISTORY (for agent context)
+      // ═══════════════════════════════════════════════════════════════════
+      let convHistory = [];
+      function addToHistory(role, text) {
+        convHistory.push(`${role}: ${text}`);
+        if (convHistory.length > 20) convHistory = convHistory.slice(-20);
+      }
+      function getContext() {
+        return convHistory.join("\n");
+      }
+
+      // ═══════════════════════════════════════════════════════════════════
+      // MAIN INPUT HANDLER
+      // ═══════════════════════════════════════════════════════════════════
+      async function start() {
+        await sleep(400);
+        const msg =
+          lang === "it"
+            ? "👋 Ciao! Sono il tuo assistente medico NCM."
+            : "👋 Hello! I'm your NCM Medical Assistant.";
+        addMsg(msg, "bot");
+        addToHistory("Assistant", msg);
+        await sleep(600);
+        const msg2 =
+          lang === "it"
+            ? 'Per iniziare, dimmi il tuo numero di cellulare.\nPuoi dire: "Il mio numero è +39 612 345 678"'
+            : 'To get started, please tell me your mobile phone number.\nYou can say: "My number is +39 612 345 678"';
+        addMsg(msg2, "bot");
+        addToHistory("Assistant", msg2);
+        S.step = "collect_phone";
+        setEnabled(true);
+      }
+
+      async function handleInput(text) {
+        addMsg(text, "user");
+        addToHistory("User", text);
+        hideChips();
+        setEnabled(false);
+        // Pre-verification steps — use fast NLP extraction
+        if (!S.verified) {
+          if (S.step === "collect_phone") await doPhone(text);
+          else if (S.step === "verify_otp") await doOTP(text);
+          else {
+            await doPhone(text);
+          } // might be a phone number
+          return;
+        }
+        // After name collection — check if we're still collecting name/lastname
+        if (S.step === "collect_name") {
+          S.userName = text.trim().split(" ")[0];
+          const msg =
+            lang === "it"
+              ? `Piacere, ${S.userName}! Qual è il tuo cognome?`
+              : `Nice to meet you, ${S.userName}! What's your last name?`;
+          await botReply(msg);
+          speak(msg);
+          addToHistory("Assistant", msg);
+          S.step = "collect_last";
+          setEnabled(true);
+          return;
+        }
+        if (S.step === "collect_last") {
+          S.userLastName = text.trim();
+          enterFreeMode();
+          // Always ask who the appointment is for before jumping to find_by
+          const m = lang==='it'
+            ? `Benvenuto ${S.userName} ${S.userLastName}! L'appuntamento è per te o per qualcun altro?`
+            : `Welcome ${S.userName} ${S.userLastName}! Is this appointment for you or for someone else?`;
+          await botReply(m); speak(m); addToHistory('Assistant', m);
+          showQRs([
+            { label: lang==='it'?'Per me':'For me',           value:'self' },
+            { label: lang==='it'?'Per qualcun altro':'For someone else', value:'other' },
+          ]);
+          S.step = 'booking_for';
+          return;
+        }
+        if (S.step === "collect_patient_name") {
+          S.patName = text.trim();
+          const msg =
+            lang === "it" ? "Cognome del paziente?" : `Patient's last name?`;
+          await botReply(msg);
+          speak(msg);
+          S.step = "collect_patient_last";
+          setEnabled(true);
+          return;
+        }
+        if (S.step === "collect_patient_last") {
+          S.patLast = text.trim();
+          const msg =
+            lang === "it"
+              ? "Numero di telefono del paziente?"
+              : `Patient's phone?`;
+          await botReply(msg);
+          speak(msg);
+          S.step = "collect_patient_phone";
+          setEnabled(true);
+          return;
+        }
+        if (S.step === "collect_patient_phone") {
+          showAI(lang === "it" ? "Leggo il numero..." : "Reading phone...");
+          const p = await extractPhone(text);
+          hideAI();
+          S.patPhone = p || text.trim();
+          await proceedToFindBy();
+          return;
+        }
+
+        // ── Free/smart mode — agent decides ──────────────────────────────
+        showAI(lang === "it" ? "Elaboro..." : "Processing...");
+        const decision = await agentDecide(text, getContext());
+        hideAI();
+
+        addToHistory("Assistant", decision.reply || "");
+
+        switch (decision.action) {
+          case "resend_otp":
+            await doResendOTP();
+            break;
+
+          case "filter_doctors":
+            await filterDoctors(decision.filter_category || text);
+            break;
+
+          case "show_doctors":
+            await showDoctors();
+            break;
+
+          case "show_appointments":
+          case "show_appointments_cancel":
+            await showAppts(decision.action === "show_appointments_cancel");
+            break;
+
+          case "start_booking":
+            if (decision.reply) {
+              await botReply(decision.reply);
+              speak(decision.speak_reply || decision.reply);
+            }
+            await proceedToFindBy();
+            break;
+
+          case "end":
+            await botReply(decision.reply || "Goodbye!");
+            speak(decision.speak_reply || decision.reply);
+            break;
+
+          default:
+            // continue_flow — handle based on current step
+            await handleFlowStep(text, decision);
+        }
+      }
+
+      async function handleFlowStep(text, decision) {
+        // Agent said something helpful — show it first if relevant
+        const stepsThatNeedLLM = [
+          "booking_for",
+          "find_by",
+          "match_doctor",
+          "confirm_doctor",
+          "collect_date",
+          "select_slot",
+          "confirm_booking",
+        ];
+
+        if (!stepsThatNeedLLM.includes(S.step)) {
+          if (decision.reply) {
+            await botReply(decision.reply);
+            speak(decision.speak_reply || decision.reply);
+          }
+          setEnabled(true);
+          return;
+        }
+
+        switch (S.step) {
+          case "booking_for": {
+            const who = await extractForWho(text);
+            if (who === "unclear") {
+              await botReply(
+                decision.reply || "Is this for you or someone else?",
+              );
+              speak(decision.reply || "Is this for you or someone else?");
+              showQRs([
+                lang === "it" ? "Per me" : "For me",
+                lang === "it" ? "Per qualcun altro" : "For someone else",
+              ]);
+              return;
+            }
+            S.forOther = who === "other";
+            if (S.forOther) {
+              const m =
+                lang === "it" ? "Nome del paziente?" : `Patient's first name?`;
+              await botReply(m);
+              speak(m);
+              S.step = "collect_patient_name";
+              setEnabled(true);
+            } else await proceedToFindBy();
+            break;
+          }
+          case "find_by":
+          case "match_doctor": {
+            showAI(lang === "it" ? "Cerco..." : "Finding match...");
+            const match = await matchDoctorOrSpec(text);
+            hideAI();
+            if (match) {
+              await handleMatch(match);
+              return;
+            }
+            if (decision.reply) {
+              await botReply(decision.reply);
+              speak(decision.speak_reply || decision.reply);
+            } else {
+              const m =
+                lang === "it"
+                  ? "Non ho trovato una corrispondenza. Puoi descriverlo diversamente?"
+                  : `I couldn't find a match. Could you describe it differently?`;
+              await botReply(m);
+              speak(m);
+            }
+            setEnabled(true);
+            break;
+          }
+          case "confirm_doctor": {
+            const ans = await extractConfirm(text);
+            if (ans === "yes") {
+              hideQRs();
+              await askDate();
+            } else if (ans === "no") {
+              hideQRs();
+              const m =
+                lang === "it"
+                  ? "Certo, cerchiamo di nuovo."
+                  : `Sure, let's search again.`;
+              await botReply(m);
+              speak(m);
+              await proceedToFindBy();
+            } else {
+              if (decision.reply) {
+                await botReply(decision.reply);
+                speak(decision.speak_reply || decision.reply);
+              } else {
+                await botReply("Please confirm yes or no.");
+              }
+              setEnabled(true);
+            }
+            break;
+          }
+          case "collect_date": {
+            showAI(lang === "it" ? "Leggo la data..." : "Parsing date...");
+            const ds = await extractDate(text);
+            hideAI();
+            if (ds) {
+              S.prefDate = ds;
+              const m =
+                lang === "it"
+                  ? `Cerco disponibilità per il ${fmtDate(ds)}...`
+                  : `Looking for slots around ${fmtDate(ds)}...`;
+              addMsg(m, "bot");
+              speak(m);
+              addToHistory("Assistant", m);
+              await loadSlots(ds);
+            } else {
+              if (decision.reply) {
+                await botReply(decision.reply);
+                speak(decision.speak_reply || decision.reply);
+              } else {
+                const m =
+                  lang === "it"
+                    ? "Non ho capito la data. Prova con 'prossimo lunedì' o 'il prima possibile'."
+                    : `I couldn't understand that date. Try "next Monday" or "as soon as possible".`;
+                await botReply(m);
+                speak(m);
+              }
+              setEnabled(true);
+            }
+            break;
+          }
+          case "select_slot": {
+            showAI(lang === "it" ? "Leggo la data..." : "Parsing date...");
+            const ds = await extractDate(text);
+            hideAI();
+            if (ds) {
+              S.prefDate = ds;
+              const m =
+                lang === "it"
+                  ? `Cerco disponibilità per il ${fmtDate(ds)}...`
+                  : `Looking for slots on ${fmtDate(ds)}...`;
+              addMsg(m, "bot");
+              speak(m);
+              addToHistory("Assistant", m);
+              await loadSlots(ds);
+            } else {
+              if (decision.reply) {
+                await botReply(decision.reply);
+                speak(decision.speak_reply || decision.reply);
+              } else {
+                const m =
+                  lang === "it"
+                    ? "Seleziona un orario sopra, o dimmi un'altra data."
+                    : `Select a time above or tell me a different date.`;
+                await botReply(m);
+                speak(m);
+              }
+              setEnabled(true);
+            }
+            break;
+          }
+          case "confirm_booking": {
+            const ans = await extractConfirm(text);
+            if (ans === "yes") {
+              hideQRs();
+              await doBook();
+            } else if (ans === "no") {
+              hideQRs();
+              const m =
+                lang === "it"
+                  ? "Prenotazione annullata."
+                  : `Booking cancelled.`;
+              await botReply(m);
+              speak(m);
+              S.step = "idle";
+              showChips([
+                lang === "it" ? "📅 Nuova prenotazione" : "📅 Book appointment",
+                lang === "it" ? "📋 I miei appuntamenti" : "📋 My appointments",
+              ]);
+            } else {
+              if (decision.reply) {
+                await botReply(decision.reply);
+                speak(decision.speak_reply || decision.reply);
+              } else {
+                await botReply("Please say yes to confirm or no to cancel.");
+              }
+              setEnabled(true);
+            }
+            break;
+          }
+          default:
+            if (decision.reply) {
+              await botReply(decision.reply);
+              speak(decision.speak_reply || decision.reply);
+            }
+            setEnabled(true);
+        }
+      }
+
+      // ═══════════════════════════════════════════════════════════════════
+      // AUTH FLOW
+      // ═══════════════════════════════════════════════════════════════════
+      async function doPhone(text) {
+        showAI(
+          lang === "it" ? "Leggo il numero..." : "Reading phone number...",
+        );
+        const phone = await extractPhone(text);
+        hideAI();
+        if (!phone) {
+          const m =
+            lang === "it"
+              ? "Non ho trovato un numero. Dimmi il tuo cellulare con prefisso, es. +39 612 345 678."
+              : `I couldn't find a phone number. Please share your mobile with country code, e.g. +39 612 345 678.`;
+          await botReply(m);
+          speak(m);
+          addToHistory("Assistant", m);
+          setEnabled(true);
+          return;
+        }
+        S.phone = phone;
+        showTyp();
+        await sleep(500);
+        try {
+          const r = await api("POST", "/api/ai/en/otp-send", { phone });
+          hideTyp();
+          if (r.success) {
+            S.otp = r.otp;
+            S.otpSent = true;
+            // Speak phone digits naturally
+            const spokenPhone = spellDigits(phone);
+            const m =
+              lang === "it"
+                ? `Ho inviato un codice di verifica a ${spokenPhone}. Dimmi le 6 cifre quando lo ricevi.`
+                : `I've sent a verification code to ${spokenPhone}. Please tell me the 6 digits when you receive it.`;
+            addMsg(m, "bot");
+            speak(m);
+            addToHistory("Assistant", m);
+            S.step = "verify_otp";
+            setEnabled(true);
+          } else {
+            const m =
+              lang === "it"
+                ? "Numero non valido. Riprova con il prefisso."
+                : `Invalid number. Please try again with country code.`;
+            await botReply(m);
+            speak(m);
+            setEnabled(true);
+          }
+        } catch (e) {
+          hideTyp();
+          const m = lang === "it" ? "Errore di rete." : `Network error.`;
+          await botReply(m);
+          speak(m);
+          setEnabled(true);
+        }
+      }
+
+      async function doResendOTP() {
+        if (!S.phone) {
+          const m =
+            lang === "it"
+              ? "Prima dimmi il tuo numero di telefono."
+              : `Please tell me your phone number first.`;
+          await botReply(m);
+          speak(m);
+          setEnabled(true);
+          return;
+        }
+        showTyp();
+        await sleep(400);
+        try {
+          const r = await api("POST", "/api/ai/en/otp-send", {
+            phone: S.phone,
+          });
+          hideTyp();
+          if (r.success) {
+            S.otp = r.otp;
+            const spokenPhone = spellDigits(S.phone);
+            const m =
+              lang === "it"
+                ? `Nuovo codice inviato a ${spokenPhone}. Dimmi le 6 cifre.`
+                : `New code sent to ${spokenPhone}. Please tell me the 6 digits.`;
+            await botReply(m);
+            speak(m);
+            S.step = "verify_otp";
+            setEnabled(true);
+          } else {
+            const m =
+              lang === "it"
+                ? "Impossibile inviare. Riprova."
+                : `Couldn't send. Please try again.`;
+            await botReply(m);
+            speak(m);
+            setEnabled(true);
+          }
+        } catch (e) {
+          hideTyp();
+          const m = lang === "it" ? "Errore di rete." : `Network error.`;
+          await botReply(m);
+          speak(m);
+          setEnabled(true);
+        }
+      }
+
+      async function doOTP(text) {
+        showAI(lang === "it" ? "Leggo il codice..." : "Reading code...");
+        const code = await extractOTP(text);
+        hideAI();
+        if (!code) {
+          const m =
+            lang === "it"
+              ? "Non ho capito il codice. Ripeti lentamente le 6 cifre."
+              : `I didn't catch a 6-digit code. Please say the digits slowly.`;
+          await botReply(m);
+          speak(m);
+          setEnabled(true);
+          return;
+        }
+        showTyp();
+        await sleep(400);
+        try {
+          const r = await api("POST", "/api/ai/en/otp-verify", { otp: code });
+          hideTyp();
+          if (r.success) {
+            S.userId = r.user?.user_id;
+            S.userEmail = r.user?.email || "";
+            S.phone = r.user?.phone || S.phone;
+            S.verified = true;
+            const m =
+              lang === "it"
+                ? "✅ Identità verificata!"
+                : `✅ Identity verified!`;
+            addMsg(m, "bot");
+            speak(m);
+            addToHistory("Assistant", m);
+            await sleep(300);
+            await loadData();
+            const m2 =
+              lang === "it" ? "Come ti chiami?" : `What's your first name?`;
+            await botReply(m2);
+            speak(m2);
+            addToHistory("Assistant", m2);
+            S.step = "collect_name";
+            setEnabled(true);
+          } else {
+            S.otpAttempts++;
+            if (S.otpAttempts >= 3) {
+              const m =
+                lang === "it"
+                  ? "Troppi tentativi. Ricarica la pagina."
+                  : `Too many attempts. Please refresh.`;
+              await botReply(m);
+              speak(m);
+              return;
+            }
+            const m =
+              lang === "it"
+                ? `Codice errato. ${3 - S.otpAttempts} tentativo/i rimanente/i. Puoi anche chiedermi di inviare un nuovo codice.`
+                : `Incorrect code. ${3 - S.otpAttempts} attempt(s) remaining. You can also ask me to resend the code.`;
+            await botReply(m);
+            speak(m);
+            setEnabled(true);
+          }
+        } catch (e) {
+          hideTyp();
+          const m =
+            lang === "it" ? "Errore di verifica." : `Verification error.`;
+          await botReply(m);
+          speak(m);
+          setEnabled(true);
+        }
+      }
+
+      async function loadData() {
+        try {
+          const [ad, dd] = await Promise.all([
+            api(
+              "GET",
+              `/api/ai/en/appointments/patient/${encodeURIComponent(S.userEmail || S.phone)}`,
+            ),
+            api("GET", "/api/ai/en/doctors"),
+          ]);
+          S.doctors = dd.doctors;
+          S.specs = dd.specializations;
+          S.appts = (ad.appointments || []).filter(
+            (a) => a.appt_date >= todayStr(),
+          );
+          // Don't show appointments automatically — only when user asks
+        } catch (e) {}
+      }
+
+      // ═══════════════════════════════════════════════════════════════════
+      // BOOKING FLOW
+      // ═══════════════════════════════════════════════════════════════════
+      async function proceedToFindBy() {
+        if (!S.doctors.length) {
+          showTyp();
+          await sleep(300);
+          try {
+            const d = await api("GET", "/api/ai/en/doctors");
+            hideTyp();
+            S.doctors = d.doctors;
+            S.specs = d.specializations;
+          } catch (e) {
+            hideTyp();
+          }
+        }
+        const m =
+          lang === "it"
+            ? 'Vuoi prenotare per nome del dottore o per specializzazione?\nPuoi anche descrivere cosa ti serve — es. "cardiologo" o "dottore per bambini".'
+            : `Would you like to book by doctor name or specialisation?\nYou can also just describe what you need — e.g. "cardiologist" or "doctor for children".`;
+        await botReply(m);
+        speak(m);
+        addToHistory("Assistant", m);
+        showQRs([
+          {
+            label: lang === "it" ? "👨‍⚕️ Per Dottore" : "👨‍⚕️ By Doctor",
+            value: "doctor",
+          },
+          {
+            label:
+              lang === "it"
+                ? "🏥 Per Specializzazione"
+                : "🏥 By Specialisation",
+            value: "spec",
+          },
+        ]);
+        S.step = "find_by";
+      }
+
+      async function handleMatch(match) {
+        if (match.type === "doctor") {
+          const doc = S.doctors.find((d) => d.user_id === match.id);
+          if (!doc) {
+            const m =
+              lang === "it"
+                ? "Dottore non trovato. Puoi darmi più dettagli?"
+                : `Doctor not found. Can you give more details?`;
+            await botReply(m);
+            speak(m);
+            setEnabled(true);
+            return;
+          }
+          await confirmDoctor(doc);
+        } else {
+          const sp = S.specs.find((s) => s.spec_id === match.id);
+          if (!sp) {
+            const m =
+              lang === "it"
+                ? "Specializzazione non trovata."
+                : `Specialisation not found.`;
+            await botReply(m);
+            speak(m);
+            setEnabled(true);
+            return;
+          }
+          S.specId = sp.spec_id;
+          S.specName = sp.spec_name;
+          S.findBy = "specialization";
+          const html = `<div class="sec-title">${lang === "it" ? "Ho trovato questa specializzazione:" : "I found this specialisation:"}</div>
+      <div class="conf-card"><div class="conf-hdr blue"><div class="conf-icon">🏥</div><div><div class="conf-title">${sp.spec_name}</div></div></div></div>
+      <div class="conf-hint">${lang === "it" ? "Vuoi continuare?" : "Would you like to continue?"}</div>`;
+          await botReply(html, true);
+          speak(
+            lang === "it"
+              ? `Ho trovato ${sp.spec_name}. Vuoi continuare?`
+              : `I found ${sp.spec_name}. Would you like to continue?`,
+          );
+          showQRs([
+            { label: lang === "it" ? "✅ Sì" : "✅ Yes", value: "yes" },
+            {
+              label: lang === "it" ? "🔄 Cerca ancora" : "🔄 Search again",
+              value: "no",
+            },
+          ]);
+          S.step = "confirm_doctor";
+          setEnabled(true);
+        }
+      }
+
+      async function confirmDoctor(doc) {
+        S.docId = doc.user_id;
+        S.docName = `${doc.doctor_title} ${doc.doctor_first_name} ${doc.doctor_last_name}`;
+        S.findBy = "doctor";
+        showTyp();
+        await sleep(400);
+        try {
+          const r = await api(
+            "GET",
+            `/api/ai/en/doctors/${doc.user_id}/specializations`,
+          );
+          hideTyp();
+          if (r.success) {
+            S.specId = r.specialization.spec_id;
+            S.specName = r.specialization.spec_name;
+          }
+        } catch (e) {
+          hideTyp();
+        }
+        const html = `<div class="sec-title">${lang === "it" ? "Ho trovato questo dottore:" : "I found this doctor:"}</div>
+    <div class="conf-card"><div class="conf-hdr green"><div class="conf-icon">👨‍⚕️</div><div><div class="conf-title">${S.docName}</div><div class="conf-sub">${S.specName || "—"}</div></div></div></div>
+    <div class="conf-hint">${lang === "it" ? "Vuoi continuare con questo dottore?" : "Would you like to continue with this doctor?"}</div>`;
+        await botReply(html, true);
+        speak(
+          lang === "it"
+            ? `Ho trovato ${S.docName}, ${S.specName}. Vuoi continuare?`
+            : `I found ${S.docName}, ${S.specName}. Would you like to continue?`,
+        );
+        showQRs([
+          { label: lang === "it" ? "✅ Sì" : "✅ Yes", value: "yes" },
+          {
+            label: lang === "it" ? "🔄 Cerca ancora" : "🔄 Search again",
+            value: "no",
+          },
+        ]);
+        S.step = "confirm_doctor";
+        setEnabled(true);
+      }
+
+      async function askDate() {
+        const m =
+          lang === "it"
+            ? 'Che data preferisci? 📅\n\nPuoi dirlo liberamente:\n• "prossimo lunedì"\n• "il prima possibile"\n• "15 giugno"\n• o esatto: 2026-06-10'
+            : `What date would you prefer? 📅\n\nSay anything naturally:\n• "next Monday"\n• "as soon as possible"\n• "June 15"\n• or exact: 2026-06-10`;
+        await botReply(m);
+        speak(
+          lang === "it"
+            ? "Che data preferisci?"
+            : "What date would you prefer?",
+        );
+        addToHistory("Assistant", m);
+        S.step = "collect_date";
+        setEnabled(true);
+      }
+
+      async function loadSlots(ds) {
+        showTyp();
+        await sleep(800);
+        try {
+          const data = await api("POST", "/api/ai/en/calendars", {
+            find_by: S.findBy,
+            doctor_user_id: S.docId,
+            specialization_id: String(S.specId),
+          });
+          hideTyp();
+          console.log('[loadSlots] API response:', JSON.stringify(data).substring(0,300));
+          console.log('[loadSlots] findBy:', S.findBy, 'docId:', S.docId, 'specId:', S.specId, 'date:', ds);
+          if(!data || !data["0"] || !data["0"].slot_rows){
+            throw new Error('Invalid API response: ' + JSON.stringify(data).substring(0,100));
+          }
+          const rows = data["0"].slot_rows,
+            dates = Object.keys(rows).sort();
+          const opts = [];
+          let used = null;
+          if (rows[ds]?.length > 0) {
+            used = ds;
+            rows[ds].forEach((s) =>
+              opts.push({ id: s.slot_id, date: ds, time: s.slot_time }),
+            );
+          } else {
+            for (const d of dates) {
+              if (d <= ds) continue;
+              if (rows[d]?.length > 0) {
+                used = d;
+                rows[d].forEach((s) =>
+                  opts.push({ id: s.slot_id, date: d, time: s.slot_time }),
+                );
+                break;
+              }
+            }
+          }
+          if (!opts.length) {
+            const m =
+              lang === "it"
+                ? "Nessuno slot trovato. Prova con un'altra data."
+                : `No slots found. Try a different date.`;
+            await botReply(m);
+            speak(m);
+            showChips([
+              lang === "it" ? "📅 Data diversa" : "📅 Different date",
+            ]);
+            return;
+          }
+          if (used !== ds) {
+            const m =
+              lang === "it"
+                ? `Nessuno slot il ${fmtDate(ds)}. Giorno più vicino:`
+                : `No slots on ${fmtDate(ds)}. Nearest available:`;
+            addMsg(m, "bot");
+            speak(m);
+          }
+          S.slotOpts = opts;
+          const morning = opts.filter((o) => o.time < "12:00:00"),
+            aftn = opts.filter((o) => o.time >= "12:00:00");
+          const dl = fmtDate(used);
+          let html = `<div class="slots-hdr">📅 ${used} · ${dl}</div>`;
+          if (morning.length) {
+            html += `<div class="period-lbl">${lang === "it" ? "🌅 Mattina" : "🌅 Morning"}</div><div class="slots-grid">`;
+            morning.forEach((o) => {
+              html += `<button class="slot-chip" data-slot-id="${o.id}" data-date="${o.date}" data-time="${o.time}">🕐 ${o.time.substring(0, 5)}</button>`;
+            });
+            html += `</div>`;
+          }
+          if (aftn.length) {
+            html += `<div class="period-lbl">${lang === "it" ? "🌆 Pomeriggio" : "🌆 Afternoon"}</div><div class="slots-grid">`;
+            aftn.forEach((o) => {
+              html += `<button class="slot-chip" data-slot-id="${o.id}" data-date="${o.date}" data-time="${o.time}">🕐 ${o.time.substring(0, 5)}</button>`;
+            });
+            html += `</div>`;
+          }
+          addMsg(html, "bot", true);
+          const m =
+            lang === "it"
+              ? "Seleziona un orario, o dimmi un'altra data."
+              : `Select a time, or tell me a different date.`;
+          addMsg(m, "bot");
+          speak(m);
+          addToHistory("Assistant", m);
+          showChips([lang === "it" ? "📅 Data diversa" : "📅 Different date"]);
+          S.step = "select_slot";
+          setEnabled(true);
+        } catch (e) {
+          hideTyp();
+          const m =
+            lang === "it"
+              ? "Errore nel caricare il calendario."
+              : `Error loading calendar.`;
+          await botReply(m);
+          speak(m);
+          setEnabled(true);
+        }
+      }
+
+      async function pickSlot(id, date, time) {
+        S.slotId = id;
+        S.slotDate = date;
+        S.slotTime = time;
+        const pat = S.forOther
+          ? `${S.patName} ${S.patLast}`
+          : `${S.userName} ${S.userLastName}`;
+        const html = `<div class="sec-title">${lang === "it" ? "Conferma prenotazione:" : "Please confirm your booking:"}</div>
+    <div class="conf-card">
+      <div class="conf-hdr blue"><div class="conf-icon">📅</div><div><div class="conf-title">${S.specName || "Appointment"}</div><div class="conf-sub">${S.docName}</div></div></div>
+      <div class="conf-body">
+        <div class="arow"><span class="al">${lang === "it" ? "Paziente" : "Patient"}</span><span class="av2">${pat}</span></div>
+        <div class="arow"><span class="al">${lang === "it" ? "Data" : "Date"}</span><span class="av2">${fmtDate(date)}</span></div>
+        <div class="arow"><span class="al">${lang === "it" ? "Orario" : "Time"}</span><span class="av2">${time.substring(0, 5)}</span></div>
+      </div>
+    </div>
+    <div class="conf-hint">${lang === "it" ? 'Dì "sì" per confermare.' : 'Say "yes" to confirm.'}</div>`;
+        await sleep(300);
+        await botReply(html, true);
+        speak(
+          lang === "it"
+            ? `${S.specName} con ${S.docName}, ${fmtDate(date)} alle ${time.substring(0, 5)}. Confermi?`
+            : `${S.specName} with ${S.docName}, ${fmtDate(date)} at ${time.substring(0, 5)}. Shall I confirm?`,
+        );
+        showQRs([
+          {
+            label: lang === "it" ? "✅ Conferma" : "✅ Confirm",
+            value: "confirm",
+          },
+          {
+            label: lang === "it" ? "❌ Annulla" : "❌ Cancel",
+            value: "cancel",
+          },
+        ]);
+        S.step = "confirm_booking";
+        setEnabled(true);
+      }
+
+      async function doBook() {
+        showTyp();
+        await sleep(1200);
+        const payload = {
+          slot_id: S.slotId,
+          user_email: S.userEmail || `${S.userName.toLowerCase()}@temp.com`,
+          user_first_name: S.userName,
+          user_last_name: S.userLastName,
+          user_gender: "Unknown",
+          user_phone: S.phone,
+          booking_for: S.forOther,
+          ...(S.forOther && {
+            patient_name: S.patName,
+            patient_surname: S.patLast,
+            patient_phone: S.patPhone,
+          }),
+        };
+        try {
+          const r = await api("POST", "/api/ai/en/appointments", payload);
+          hideTyp();
+          if (r.success) {
+            const html = `<div class="success-wrap"><div class="success-icon">🎉</div><div class="success-title">${lang === "it" ? "Prenotazione Confermata!" : "Booking Confirmed!"}</div>
+        <div class="conf-card"><div class="conf-hdr green"><div class="conf-icon">✅</div><div><div class="conf-title">${S.specName}</div><div class="conf-sub">${S.docName}</div></div></div>
+        <div class="conf-body">
+          <div class="arow"><span class="al">${lang === "it" ? "Data" : "Date"}</span><span class="av2">${fmtDate(r.appointment.appt_date)}</span></div>
+          <div class="arow"><span class="al">${lang === "it" ? "Codice" : "Booking ID"}</span><span class="av2">#${r.appointment.appt_id}</span></div>
+        </div></div></div>`;
+            addMsg(html, "bot", true);
+            speak(
+              lang === "it"
+                ? `Prenotazione confermata! ${S.specName} con ${S.docName} il ${fmtDate(r.appointment.appt_date)}.`
+                : `Booking confirmed! ${S.specName} with ${S.docName} on ${fmtDate(r.appointment.appt_date)}.`,
+            );
+            await sleep(600);
+            const m =
+              lang === "it"
+                ? "Ci vediamo presto! Posso aiutarti con altro?"
+                : `See you soon! Anything else I can help with?`;
+            await botReply(m);
+            speak(m);
+            addToHistory("Assistant", m);
+            S.step = "idle";
+            showChips([
+              lang === "it" ? "📋 I miei appuntamenti" : "📋 My appointments",
+              lang === "it" ? "📅 Prenota ancora" : "📅 Book another",
+              lang === "it" ? "👋 Fine" : "👋 Done",
+            ]);
+            if (talkActive)
+              talkSpeak(
+                lang === "it"
+                  ? `Prenotazione confermata! ${S.specName} con ${S.docName}.`
+                  : `Booking confirmed! ${S.specName} with ${S.docName}.`,
+              );
+          } else {
+            const m =
+              lang === "it"
+                ? "Prenotazione fallita. Riprova."
+                : `Booking failed. Please try again.`;
+            await botReply(m);
+            speak(m);
+            setEnabled(true);
+          }
+        } catch (e) {
+          hideTyp();
+          const m = lang === "it" ? "Errore di rete." : `Network error.`;
+          await botReply(m);
+          speak(m);
+          setEnabled(true);
+        }
+      }
+
+      async function cancelAppt(id, date) {
+        showTyp();
+        await sleep(500);
+        try {
+          await api("DELETE", `/api/ai/en/appointments/${id}`);
+          hideTyp();
+          S.appts = S.appts.filter((a) => a.appt_id !== id);
+          const m =
+            lang === "it"
+              ? `✅ Appuntamento del ${date} annullato.`
+              : `✅ Appointment on ${date} cancelled.`;
+          await botReply(m);
+          speak(m);
+          if (!S.appts.length) {
+            const m2 =
+              lang === "it"
+                ? "Non hai altri appuntamenti."
+                : `You have no more appointments.`;
+            await botReply(m2);
+            speak(m2);
+          }
+          showChips([
+            lang === "it" ? "📅 Nuova prenotazione" : "📅 Book new appointment",
+            lang === "it" ? "📋 I miei appuntamenti" : "📋 My appointments",
+          ]);
+        } catch (e) {
+          hideTyp();
+          const m =
+            lang === "it"
+              ? "Errore nell'annullamento."
+              : `Cancellation failed.`;
+          await botReply(m);
+          speak(m);
+          setEnabled(true);
+        }
+      }
+
+      async function showAppts(cancelMode = false) {
+        showTyp();
+        await sleep(500);
+        try {
+          const d = await api(
+            "GET",
+            `/api/ai/en/appointments/patient/${encodeURIComponent(S.userEmail || S.phone)}`,
+          );
+          hideTyp();
+          const up = (d.appointments || []).filter(
+            (a) => a.appt_date >= todayStr(),
+          );
+          S.appts = up;
+          if (!up.length) {
+            const m =
+              lang === "it"
+                ? "Non hai appuntamenti futuri."
+                : `You have no upcoming appointments.`;
+            addMsg(m, "bot");
+            speak(m);
+            showChips([lang === "it" ? "📅 Prenota" : "📅 Book appointment"]);
+            setEnabled(true);
+            return;
+          }
+          addMsg(buildApptCards(up), "bot", true);
+          // Speak a natural summary
+          const docNames = up
+            .slice(0, 2)
+            .map((a) => {
+              const doc = S.doctors.find((d) => d.user_id === a.doctor_user_id);
+              return doc ? `${doc.doctor_title} ${doc.doctor_last_name}` : "";
+            })
+            .filter(Boolean);
+          const summary =
+            lang === "it"
+              ? `Hai ${up.length} appuntamento${up.length > 1 ? "i" : ""} in programma: ${docNames.join(", ")}${up.length > 2 ? ", e altri" : ""}.`
+              : `You have ${up.length} upcoming appointment${up.length > 1 ? "s" : ""}: ${docNames.join(", ")}${up.length > 2 ? ", and more" : ""}.`;
+          speak(summary);
+          showChips([
+            lang === "it" ? "📅 Nuova prenotazione" : "📅 Book new appointment",
+            lang === "it" ? "🔙 Indietro" : "🔙 Back",
+          ]);
+          setEnabled(true);
+        } catch (e) {
+          hideTyp();
+          const m =
+            lang === "it"
+              ? "Errore nel caricare gli appuntamenti."
+              : `Error loading appointments.`;
+          await botReply(m);
+          speak(m);
+          setEnabled(true);
+        }
+      }
+
+      // ── Filter doctors by category ────────────────────────────────────
+      async function filterDoctors(category) {
+        if (!S.doctors.length) {
+          showTyp();
+          await sleep(300);
+          try {
+            const d = await api("GET", "/api/ai/en/doctors");
+            hideTyp();
+            S.doctors = d.doctors;
+            S.specs = d.specializations;
+          } catch (e) {
+            hideTyp();
+          }
+        }
+        showAI(lang === "it" ? "Filtro i dottori..." : "Filtering doctors...");
+        // Use medical model to find the specialisation
+        const match = await matchDoctorOrSpec(category);
+        hideAI();
+        let filteredDocs = S.doctors;
+        let filterLabel = category;
+        if (match?.type === "spec") {
+          const sp = S.specs.find((s) => s.spec_id === match.id);
+          if (sp) {
+            filterLabel = sp.spec_name;
+            // For now show all doctors (in real API doctors don't have spec embedded, would need per-doctor call)
+            // Show spec info and let user pick
+            S.specId = sp.spec_id;
+            S.specName = sp.spec_name;
+            S.findBy = "specialization";
+          }
+        }
+        // Show doctors list with filter label
+        const html = `<div class="info-title">${lang === "it" ? `👨‍⚕️ Dottori — ${filterLabel} (${filteredDocs.length})` : `👨‍⚕️ Doctors — ${filterLabel} (${filteredDocs.length})`}</div>
+    <div class="info-list">${filteredDocs.map((d) => `<div class="info-item">${d.doctor_title} ${d.doctor_first_name} ${d.doctor_last_name}</div>`).join("")}</div>`;
+        addMsg(html, "bot", true);
+        // Speak doctor names naturally
+        const names = filteredDocs
+          .slice(0, 4)
+          .map((d) => `${d.doctor_title} ${d.doctor_last_name}`)
+          .join(", ");
+        const m =
+          lang === "it"
+            ? `Abbiamo ${filteredDocs.length} dottori disponibili: ${names}${filteredDocs.length > 4 ? `, e altri ${filteredDocs.length - 4}` : ""}. Vuoi prenotare con uno di loro?`
+            : `We have ${filteredDocs.length} doctors available: ${names}${filteredDocs.length > 4 ? `, and ${filteredDocs.length - 4} more` : ""}. Would you like to book with one of them?`;
+        speak(m);
+        S.shownDoctors = filteredDocs;
+        showChips([
+          lang === "it"
+            ? "📅 Prenota con uno di loro"
+            : "📅 Book with one of them",
+          lang === "it" ? "🔙 Indietro" : "🔙 Back",
+        ]);
+        setEnabled(true);
+      }
+
+      async function showDoctors() {
+        if (!S.doctors.length) {
+          showTyp();
+          await sleep(300);
+          try {
+            const d = await api("GET", "/api/ai/en/doctors");
+            hideTyp();
+            S.doctors = d.doctors;
+            S.specs = d.specializations;
+          } catch (e) {
+            hideTyp();
+          }
+        }
+        const html = `<div class="info-title">${lang === "it" ? `👨‍⚕️ Dottori disponibili (${S.doctors.length})` : `👨‍⚕️ Available Doctors (${S.doctors.length})`}</div>
+    <div class="info-list">${S.doctors.map((d) => `<div class="info-item">${d.doctor_title} ${d.doctor_first_name} ${d.doctor_last_name}</div>`).join("")}</div>`;
+        addMsg(html, "bot", true);
+        const names = S.doctors
+          .slice(0, 3)
+          .map((d) => `${d.doctor_title} ${d.doctor_last_name}`)
+          .join(", ");
+        const m =
+          lang === "it"
+            ? `Abbiamo ${S.doctors.length} dottori, tra cui ${names}, e altri.`
+            : `We have ${S.doctors.length} doctors including ${names}, and more.`;
+        speak(m);
+        showChips([
+          lang === "it" ? "📅 Prenota" : "📅 Book appointment",
+          lang === "it" ? "🔙 Indietro" : "🔙 Back",
+        ]);
+        setEnabled(true);
+      }
+
+      function buildApptCards(appts) {
+        let html = `<div class="sec-title">${lang === "it" ? `📋 Appuntamenti futuri (${appts.length})` : `📋 Upcoming appointments (${appts.length})`}</div>`;
+        appts.slice(0, 4).forEach((a) => {
+          const doc = S.doctors.find((d) => d.user_id === a.doctor_user_id);
+          const sp = S.specs.find((s) => s.spec_id === a.spec_id);
+          html += `<div class="appt-card">
+      <div class="appt-hdr"><div class="appt-hdr-icon">🏥</div><div><div class="appt-hdr-title">${sp?.spec_name || "—"}</div><div class="appt-hdr-sub">${doc ? `${doc.doctor_title} ${doc.doctor_first_name} ${doc.doctor_last_name}` : "—"}</div></div></div>
+      <div class="appt-body">
+        <div class="arow"><span class="al">${lang === "it" ? "Data" : "Date"}</span><span class="av2">${fmtDate(a.appt_date)}</span></div>
+        <div class="arow"><span class="al">${lang === "it" ? "Orario" : "Time"}</span><span class="av2">${a.slot_time ? a.slot_time.substring(0, 5) : "—"}</span></div>
+        <div class="arow"><span class="al">${lang === "it" ? "Codice" : "ID"}</span><span class="av2">#${a.appt_id}</span></div>
+      </div>
+      <button class="cancel-btn" data-appt-id="${a.appt_id}" data-date="${a.appt_date}">❌ ${lang === "it" ? "Annulla questo appuntamento" : "Cancel this appointment"}</button>
+    </div>`;
+        });
+        return html;
+      }
+
+      // ═══════════════════════════════════════════════════════════════════
+      // QUICK REPLY ROUTER
+      // ═══════════════════════════════════════════════════════════════════
+      async function onQR(val, label) {
+        addMsg(label, "user");
+        addToHistory("User", label);
+        hideQRs();
+        hideChips();
+        setEnabled(false);
+        const bookVals = [
+          "📅 Book appointment",
+          "📅 Book new appointment",
+          "📅 Book another",
+          "📅 Book with one of them",
+          "📅 Prenota",
+          "📅 Nuova prenotazione",
+          "📅 Prenota ancora",
+          "📅 Prenota con uno di loro",
+        ];
+        if (bookVals.includes(val)) {
+          await proceedToFindBy();
+          return;
+        }
+        if (["📋 My appointments", "📋 I miei appuntamenti"].includes(val)) {
+          await showAppts();
+          return;
+        }
+        if (["👨‍⚕️ Doctors", "👨‍⚕️ Browse doctors"].includes(val)) {
+          await showDoctors();
+          return;
+        }
+        if (["📅 Different date", "📅 Data diversa"].includes(val)) {
+          await askDate();
+          return;
+        }
+        if (["🔙 Back", "🔙 Indietro", "👋 Done", "👋 Fine"].includes(val)) {
+          const m =
+            lang === "it"
+              ? "Posso aiutarti con altro?"
+              : `Anything else I can help with?`;
+          await botReply(m);
+          speak(m);
+          showChips([
+            lang === "it" ? "📋 I miei appuntamenti" : "📋 My appointments",
+            lang === "it" ? "📅 Prenota" : "📅 Book appointment",
+          ]);
+          return;
+        }
+
+        switch (S.step) {
+          case "booking_for":
+            S.forOther =
+              (val === lang) === "it"
+                ? "Per qualcun altro"
+                : "For someone else" ||
+                  val === "For someone else" ||
+                  val === "Per qualcun altro";
+            if (S.forOther) {
+              const m =
+                lang === "it" ? "Nome del paziente?" : `Patient's first name?`;
+              await botReply(m);
+              speak(m);
+              S.step = "collect_patient_name";
+              setEnabled(true);
+            } else await proceedToFindBy();
+            break;
+          case "find_by":
+            if (
+              val === "doctor" ||
+              val === "👨‍⚕️ By Doctor" ||
+              val === "👨‍⚕️ Per Dottore"
+            ) {
+              const m =
+                lang === "it"
+                  ? "Quale dottore? Scrivi il nome — anche parziale o con errori."
+                  : `Which doctor? Type their name — partial or misspelled is fine.`;
+              await botReply(m);
+              speak(m);
+              S.step = "match_doctor";
+              setEnabled(true);
+            } else {
+              const m =
+                lang === "it"
+                  ? "Quale specializzazione? Descrivila liberamente."
+                  : `Which specialisation? Describe it naturally.`;
+              await botReply(m);
+              speak(m);
+              S.step = "match_doctor";
+              setEnabled(true);
+            }
+            break;
+          case "confirm_doctor":
+            if (val === "yes") {
+              await askDate();
+            } else {
+              const m =
+                lang === "it" ? "Cerchiamo di nuovo." : `Let's search again.`;
+              await botReply(m);
+              speak(m);
+              await proceedToFindBy();
+            }
+            break;
+          case "confirm_booking":
+            if (val === "confirm") await doBook();
+            else {
+              const m =
+                lang === "it"
+                  ? "Prenotazione annullata."
+                  : `Booking cancelled.`;
+              await botReply(m);
+              speak(m);
+              S.step = "idle";
+              showChips([
+                lang === "it" ? "📅 Prenota" : "📅 Book appointment",
+                lang === "it" ? "📋 I miei appuntamenti" : "📋 My appointments",
+              ]);
+            }
+            break;
+          default:
+            setEnabled(true);
+        }
+      }
+
+      // ═══════════════════════════════════════════════════════════════════
+      // MIC — request permission ONCE on page load, reuse instance
+      // ═══════════════════════════════════════════════════════════════════
+      let chatRecog = null,
+        chatListening = false;
+      let talkRecog = null,
+        talkActive = false,
+        talkMuted = false,
+        spkOn = true;
+      let isSpeaking = false,
+        isListening = false;
+      let talkHistory = [],
+        talkTimerInt = null,
+        talkSecs = 0;
+      let micPermGranted = false;
+
+      // Request mic permission once at startup — after first user interaction
+      async function requestMicOnce() {
+        if (micPermGranted) return true;
+        const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+        if (!SR) {
+          console.warn("SpeechRecognition not supported");
+          return false;
+        }
+        if (location.protocol === "file:") {
+          // Can never get persistent mic from file:// — warn and return false
+          return false;
+        }
+        try {
+          const stream = await navigator.mediaDevices.getUserMedia({
+            audio: true,
+          });
+          stream.getTracks().forEach((t) => t.stop());
+          micPermGranted = true;
+          if (!chatRecog) initChatRecog();
+          if (!talkRecog) initTalkRecog();
+          return true;
+        } catch (e) {
+          console.warn("Mic permission denied:", e);
+          return false;
+        }
+      }
+
+      function initChatRecog() {
+        const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+        if (!SR || chatRecog) return;
+        chatRecog = new SR();
+        chatRecog.lang = l("sttLang");
+        chatRecog.interimResults = true;
+        chatRecog.continuous = false;
+        chatRecog._listening = false;
+        chatRecog.onstart = () => {
+          chatListening = true;
+          micBtnEl.classList.add("on");
+        };
+        chatRecog.onresult = (e) => {
+          inp.value = Array.from(e.results)
+            .map((r) => r[0].transcript)
+            .join("");
+        };
+        chatRecog.onend = () => {
+          chatListening = false;
+          micBtnEl.classList.remove("on");
+          const tx = inp.value.trim();
+          if (tx && !inp.disabled)
+            setTimeout(() => {
+              inp.value = "";
+              handleInput(tx);
+            }, 300);
+        };
+        chatRecog.onerror = (e) => {
+          chatListening = false;
+          micBtnEl.classList.remove("on");
+        };
+      }
+
+      // ── Listen-then-process engine ───────────────────────────────────
+      // Flow: talkSpeak(text) → afterTalkSpeak() → listenForResponse()
+      // listenForResponse opens mic for up to 8s, waits for speech,
+      // if nothing heard retries up to 2 times then prompts again.
+
+      let _listenRetries = 0;
+      let _waitingForRepeat = false;
+      const MAX_RETRIES = 1; // 1 silent retry then prompt
+
+      function initTalkRecog() {
+        const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+        if (!SR || talkRecog) return;
+
+        talkRecog = new SR();
+        talkRecog.lang = l("sttLang");
+        talkRecog.interimResults = true;
+        talkRecog.continuous = false; // one utterance at a time
+        talkRecog.maxAlternatives = 1;
+        talkRecog._captured = "";
+        talkRecog._silenceTimer = null;
+
+        talkRecog.onstart = () => {
+          isListening = true;
+          showWave(true, true);
+          talkStEl.textContent = lang === "it" ? "Ascolto..." : "Listening...";
+          talkStEl.className = "talk-st listening";
+          talkRecog._captured = "";
+
+          // Safety timeout — if browser never fires onend, force it after 10s
+          talkRecog._silenceTimer = setTimeout(() => {
+            if (isListening) {
+              try {
+                talkRecog.stop();
+              } catch (e) {}
+            }
+          }, 10000);
+        };
+
+        talkRecog.onresult = (e) => {
+          const txt = Array.from(e.results)
+            .map((r) => r[0].transcript)
+            .join("");
+          const isFinal = e.results[e.results.length - 1].isFinal;
+          if (isFinal) {
+            talkRecog._captured = txt;
+            talkStEl.textContent = `"${txt.substring(0, 45)}"`;
+            // Got final result — stop immediately, don't wait for silence
+            clearTimeout(talkRecog._silenceTimer);
+            try {
+              talkRecog.stop();
+            } catch (e) {}
+          } else {
+            // Show live interim
+            talkStEl.textContent = `${lang === "it" ? "Sento" : "Hearing"}: ${txt.substring(0, 40)}`;
+          }
+        };
+
+        talkRecog.onend = () => {
+          clearTimeout(talkRecog._silenceTimer);
+          isListening = false;
+          showWave(false);
+          if (!talkActive) return;
+
+          const heard = (talkRecog._captured || "").trim();
+          talkRecog._captured = "";
+
+          if (heard) {
+            // Got speech — reset retry counter and process
+            _listenRetries = 0;
+            addTalkLine("user", heard);
+            processTalkTurn(heard);
+          } else {
+            // Nothing heard in this window
+            _listenRetries++;
+            if (_listenRetries < MAX_RETRIES) {
+              // Silently retry — just reopen mic
+              talkStEl.textContent =
+                lang === "it" ? "Ascolto..." : "Listening...";
+              talkStEl.className = "talk-st listening";
+              setTimeout(() => {
+                if (talkActive && !talkMuted && !isSpeaking) startTalkListen();
+              }, 800);
+            } else {
+              // Max retries hit — ask once, then reset and wait
+              _listenRetries = 0;
+              const prompt =
+                lang === "it"
+                  ? "Non ti sento. Parla più vicino al microfono."
+                  : "I cannot hear you. Please speak closer to the microphone.";
+              addTalkLine("bot", prompt);
+              // Speak prompt but use a flag so afterTalkSpeak knows to NOT auto-retry infinitely
+              _waitingForRepeat = true;
+              talkSpeak(prompt);
+            }
+          }
+        };
+
+        talkRecog.onerror = (e) => {
+          clearTimeout(talkRecog._silenceTimer);
+          isListening = false;
+          showWave(false);
+          talkRecog._captured = "";
+
+          if (e.error === "not-allowed") {
+            talkStEl.textContent =
+              lang === "it" ? "Microfono negato" : "Mic permission denied";
+            endTalk();
+            return;
+          }
+          if (e.error === "no-speech") {
+            // No speech detected in this window — treat as empty, let onend handle it
+            // (onend fires right after onerror for no-speech)
+            return;
+          }
+          if (e.error === "aborted") return; // intentional stop, ignore
+          // Any other error — retry after short pause
+          if (talkActive && !talkMuted && !isSpeaking) {
+            setTimeout(() => startTalkListen(), 800);
+          }
+        };
+      }
+
+      async function toggleMic() {
+        // Request permission if not done yet
+        if (!micPermGranted) {
+          const ok = await requestMicOnce();
+          if (!ok) {
+            alert(
+              lang === "it"
+                ? "Microfono non supportato. Usa Chrome o Edge."
+                : "Voice not supported. Use Chrome or Edge.",
+            );
+            return;
+          }
+        }
+        if (!chatRecog) initChatRecog();
+        chatRecog.lang = l("sttLang");
+        if (chatListening) {
+          chatRecog.stop();
+          return;
+        }
+        try {
+          chatRecog.start();
+        } catch (e) {
+          chatRecog.abort();
+          setTimeout(() => {
+            try {
+              chatRecog.start();
+            } catch (e2) {}
+          }, 150);
+        }
+      }
+
+      // ═══════════════════════════════════════════════════════════════════
+      // TALK TAB
+      // ═══════════════════════════════════════════════════════════════════
+      const talkAvEl = document.getElementById("talkAv"),
+        talkStEl = document.getElementById("talkSt");
+      const wavesEl = document.getElementById("waves"),
+        transcriptEl = document.getElementById("transcript");
+      const ctrlIdle = document.getElementById("ctrlIdle"),
+        ctrlLive = document.getElementById("ctrlLive");
+      const talkTimerEl = document.getElementById("talkTimer");
+
+      function setTalkSt(txt, cls) {
+        talkStEl.textContent = txt;
+        talkStEl.className = `talk-st ${cls}`;
+      }
+      function showWave(show, red = false) {
+        wavesEl.classList.toggle("show", show);
+        wavesEl.classList.toggle("red", red);
+      }
+      function addTalkLine(role, text) {
+        talkHistory.push({ role, text });
+        const recent = talkHistory.slice(-8);
+        transcriptEl.innerHTML = recent
+          .map(
+            (tx) =>
+              `<div class="t-line ${tx.role}"><div class="t-spk">${tx.role === "bot" ? (lang === "it" ? "Assistente" : "Assistant") : lang === "it" ? "Tu" : "You"}</div><div class="t-txt">${tx.text}</div></div>`,
+          )
+          .join("");
+        transcriptEl.scrollTop = transcriptEl.scrollHeight;
+      }
+
+      function talkSpeak(text, onDone) {
+        if (!text || !window.speechSynthesis) {
+          onDone?.();
+          afterTalkSpeak();
+          return;
+        }
+
+        // Cancel any ongoing speech or listening before speaking
+        window.speechSynthesis.cancel();
+        if (talkRecog && isListening) {
+          try {
+            talkRecog.stop();
+          } catch (e) {}
+        }
+
+        const clean = cleanForSpeech(String(text));
+        if (!clean || clean.length < 2) {
+          onDone?.();
+          afterTalkSpeak();
+          return;
+        }
+
+        isSpeaking = true;
+        showWave(true, false);
+        setTalkSt(lang === "it" ? "Parlo..." : "Speaking...", "speaking");
+
+        const u = new SpeechSynthesisUtterance(clean);
+        u.lang = l("ttsLang");
+        u.rate = 0.92;
+        u.pitch = 1.0;
+
+        // Pick best natural voice
+        const vs = window.speechSynthesis.getVoices();
+        let pref;
+        if (lang === "it") {
+          pref =
+            vs.find((v) => v.name === "Google italiano") ||
+            vs.find(
+              (v) => v.lang.startsWith("it") && v.name.includes("Google"),
+            ) ||
+            vs.find((v) => v.lang.startsWith("it"));
+        } else {
+          pref =
+            vs.find((v) => v.name === "Google UK English Female") ||
+            vs.find((v) => v.name.includes("Google") && v.lang === "en-GB") ||
+            vs.find(
+              (v) => v.name.includes("Google") && v.lang.startsWith("en"),
+            ) ||
+            vs.find((v) => v.lang.startsWith("en-GB")) ||
+            vs.find((v) => v.lang.startsWith("en"));
+        }
+        if (pref) u.voice = pref;
+
+        u.onend = () => {
+          onDone?.();
+          afterTalkSpeak(); // opens mic after speaking
+        };
+        u.onerror = () => {
+          afterTalkSpeak(); // still open mic even if TTS failed
+        };
+
+        window.speechSynthesis.speak(u);
+
+        // Chrome bug: sometimes onend never fires if tab loses focus
+        // Watchdog: if still "speaking" after text_length/10 seconds + 3s buffer, force afterTalkSpeak
+        const watchdog = Math.max(4000, clean.length * 80);
+        setTimeout(() => {
+          if (isSpeaking) {
+            isSpeaking = false;
+            showWave(false);
+            onDone?.();
+            afterTalkSpeak();
+          }
+        }, watchdog);
+      }
+      function afterTalkSpeak() {
+        isSpeaking = false;
+        showWave(false);
+        if (!talkActive || talkMuted) return;
+        if (_waitingForRepeat) {
+          // After saying "I cannot hear you", wait 1.5s then try ONE more time
+          _waitingForRepeat = false;
+          _listenRetries = 0;
+          setTalkSt(lang === "it" ? "Ascolto..." : "Listening...", "listening");
+          setTimeout(startTalkListen, 1500);
+        } else {
+          setTalkSt(lang === "it" ? "Ascolto..." : "Listening...", "listening");
+          setTimeout(startTalkListen, 700);
+        }
+      }
+
+      // ── Whisper STT via Groq ─────────────────────────────────────────
+      async function transcribeWithWhisper(blob) {
+        const form = new FormData();
+        form.append('file', blob, 'speech.webm');
+        form.append('model', 'whisper-large-v3');
+        form.append('language', lang === 'it' ? 'it' : 'en');
+        form.append('response_format', 'json');
+        try {
+          const r = await fetch('https://api.groq.com/openai/v1/audio/transcriptions', {
+            method: 'POST',
+            headers: { 'Authorization': `Bearer ${GROQ_KEY}` },
+            body: form
+          });
+          const d = await r.json();
+          return (d.text || '').trim() || null;
+        } catch(e) {
+          console.warn('[Whisper]', e);
+          return null;
+        }
+      }
+
+      let _rec = null, _recActive = false, _recStream = null;
+
+      function startTalkListen() {
+        if (!talkActive || talkMuted || isSpeaking || isListening || _recActive) return;
+        isListening = true;
+        _recActive  = true;
+        showWave(true, true);
+        setTalkSt(lang === 'it' ? 'Ascolto...' : 'Listening...', 'listening');
+
+        // Silence detection state
+        let speechDetected = false, silenceStart = null, silenceLoop = null;
+        let speechStart    = null;
+        const ECHO_MS  = 400;   // ignore audio for first 400ms (echo gate)
+        const SIL_MS   = 1800;  // stop after 1.8s silence
+        const MIN_MS   = 600;   // reject clips < 600ms (noise)
+        const NO_MS    = 7000;  // give up if no speech in 7s
+        const MAX_MS   = 15000; // hard cap
+        const openTime = Date.now();
+        const chunks   = [];
+
+        navigator.mediaDevices.getUserMedia({ audio: true })
+          .then(stream => {
+            _recStream = stream;
+            const audioCtx  = new (window.AudioContext || window.webkitAudioContext)();
+            const src       = audioCtx.createMediaStreamSource(stream);
+            const analyser  = audioCtx.createAnalyser();
+            analyser.fftSize = 512;
+            src.connect(analyser);
+            const buf = new Uint8Array(analyser.frequencyBinCount);
+
+            function rms() {
+              analyser.getByteTimeDomainData(buf);
+              let s = 0;
+              for(let i = 0; i < buf.length; i++) { const v = (buf[i]-128)/128; s += v*v; }
+              return Math.sqrt(s/buf.length) * 255;
+            }
+
+            const mimeType = ['audio/webm;codecs=opus','audio/webm','audio/ogg','audio/mp4']
+              .find(t => { try{ return MediaRecorder.isTypeSupported(t); }catch(e){ return false; } }) || '';
+            _rec = new MediaRecorder(stream, mimeType ? { mimeType } : {});
+            _rec.ondataavailable = e => { if(e.data && e.data.size > 0) chunks.push(e.data); };
+
+            function stopRec() {
+              clearTimeout(silenceLoop);
+              clearTimeout(noTimer);
+              clearTimeout(hardTimer);
+              try { audioCtx.close(); } catch(e) {}
+              // Do NOT stop stream tracks — keep mic warm
+              if(_recActive) {
+                _recActive = false;
+                try { _rec.stop(); } catch(e) {}
+              }
+            }
+
+            _rec.onstop = async () => {
+              isListening = false; showWave(false);
+              if(!talkActive) return;
+              const blob = new Blob(chunks, { type: _rec.mimeType || 'audio/webm' });
+              if(!speechDetected || blob.size < 3000) {
+                // Nothing heard — retry
+                _listenRetries++;
+                if(_listenRetries < MAX_RETRIES) {
+                  setTimeout(() => startTalkListen(), 800);
+                } else {
+                  _listenRetries = 0;
+                  const p = lang==='it' ? 'Non ti sento. Parla piu vicino al microfono.' : 'I cannot hear you. Please speak closer to the microphone.';
+                  addTalkLine('bot', p);
+                  _waitingForRepeat = true;
+                  talkSpeak(p);
+                }
+                return;
+              }
+              _listenRetries = 0;
+              setTalkSt(lang==='it' ? 'Elaboro...' : 'Processing...', 'thinking');
+              const transcript = await transcribeWithWhisper(blob);
+              if(transcript && transcript.length > 1) {
+                addTalkLine('user', transcript);
+                processTalkTurn(transcript);
+              } else {
+                // Whisper returned nothing — fall back and retry
+                setTimeout(() => startTalkListen(), 600);
+              }
+            };
+
+            _rec.onerror = () => {
+              isListening = false; _recActive = false; showWave(false);
+              setTimeout(() => startTalkListen(), 800);
+            };
+
+            function checkSilence() {
+              if(!_recActive) return;
+              const now = Date.now();
+              if(now - openTime < ECHO_MS) { silenceLoop = setTimeout(checkSilence, 80); return; }
+              const v = rms();
+              if(v > 9) {
+                if(!speechDetected) { speechDetected = true; speechStart = now; }
+                silenceStart = null;
+                talkStEl.textContent = lang==='it' ? 'Ti sento...' : 'Hearing you...';
+              } else if(speechDetected && !silenceStart) {
+                silenceStart = now;
+              }
+              if(speechDetected && silenceStart) {
+                const dur = silenceStart - (speechStart || silenceStart);
+                if(Date.now() - silenceStart >= SIL_MS) {
+                  if(dur < MIN_MS) {
+                    speechDetected = false; speechStart = null; silenceStart = null;
+                    silenceLoop = setTimeout(checkSilence, 80); return;
+                  }
+                  stopRec(); return;
+                }
+              }
+              silenceLoop = setTimeout(checkSilence, 80);
+            }
+
+            const noTimer   = setTimeout(() => { if(!speechDetected) stopRec(); }, NO_MS);
+            const hardTimer = setTimeout(stopRec, MAX_MS);
+
+            _rec.start(100);
+            silenceLoop = setTimeout(checkSilence, 80);
+          })
+          .catch(e => {
+            isListening = false; _recActive = false; showWave(false);
+            setTalkSt(lang==='it' ? 'Microfono negato.' : 'Mic denied. Check browser settings.', 'ended');
+            endTalk();
+          });
+      }
+
+      async function processTalkTurn(text) {
+        // Stop listening while processing
+        setTalkSt(lang === "it" ? "Penso..." : "Thinking...", "thinking");
+        showWave(false);
+
+        // ── Simple direct flow for talk — no shared state with chat ──
+        // Phone collection
+        if (
+          !S.verified &&
+          (S.step === "collect_phone" || S.step === "verify_otp")
+        ) {
+          if (S.step === "collect_phone") {
+            setTalkSt(
+              lang === "it" ? "Leggo il numero..." : "Reading number...",
+              "thinking",
+            );
+            const phone = await extractPhone(text);
+            if (!phone) {
+              const m =
+                lang === "it"
+                  ? "Non ho capito il numero. Dimmi il tuo cellulare con prefisso, per esempio più 39 612 345 678."
+                  : "I did not catch your number. Please say your mobile with country code, for example plus 39 612 345 678.";
+              addTalkLine("bot", m);
+              talkSpeak(m);
+              return;
+            }
+            S.phone = phone;
+            try {
+              const r = await api("POST", "/api/ai/en/otp-send", { phone });
+              if (r.success) {
+                S.otp = r.otp;
+                S.otpSent = true;
+                const spk = spellDigits(phone);
+                const m =
+                  lang === "it"
+                    ? `Ho inviato un codice a ${spk}. Dimmi le sei cifre.`
+                    : `I sent a code to ${spk}. Please say the six digits.`;
+                addTalkLine("bot", m);
+                talkSpeak(m);
+                S.step = "verify_otp";
+              } else {
+                const m =
+                  lang === "it"
+                    ? "Numero non valido. Riprova."
+                    : "Invalid number. Please try again.";
+                addTalkLine("bot", m);
+                talkSpeak(m);
+              }
+            } catch (e) {
+              const m = "Network error. Try again.";
+              addTalkLine("bot", m);
+              talkSpeak(m);
+            }
+            return;
+          }
+          if (S.step === "verify_otp") {
+            // Check if user wants resend
+            const lower = text.toLowerCase();
+            if (
+              lower.includes("resend") ||
+              lower.includes("again") ||
+              lower.includes("new code") ||
+              lower.includes("did not receive") ||
+              lower.includes("reinvia") ||
+              lower.includes("nuovo codice")
+            ) {
+              await doResendOTP();
+              const r = S.otp ? "New code sent." : "Could not resend.";
+              addTalkLine("bot", r);
+              talkSpeak(r);
+              return;
+            }
+            setTalkSt(
+              lang === "it" ? "Leggo il codice..." : "Reading code...",
+              "thinking",
+            );
+            const code = await extractOTP(text);
+            if (!code) {
+              const m =
+                lang === "it"
+                  ? "Non ho sentito il codice. Dimmi le sei cifre lentamente."
+                  : "I did not catch the code. Please say the six digits slowly.";
+              addTalkLine("bot", m);
+              talkSpeak(m);
+              return;
+            }
+            try {
+              const r = await api("POST", "/api/ai/en/otp-verify", {
+                otp: code,
+              });
+              if (r.success) {
+                S.userId = r.user?.user_id;
+                S.userEmail = r.user?.email || "";
+                S.phone = r.user?.phone || S.phone;
+                S.verified = true;
+                await loadData();
+                const m =
+                  lang === "it"
+                    ? `Identità verificata! Come ti chiami?`
+                    : "Identity verified! What's your first name?";
+                addTalkLine("bot", m);
+                talkSpeak(m);
+                S.step = "collect_name";
+              } else {
+                S.otpAttempts++;
+                const m =
+                  S.otpAttempts >= 3
+                    ? lang === "it"
+                      ? "Troppi tentativi. Ricarica la pagina."
+                      : "Too many attempts. Please refresh."
+                    : lang === "it"
+                      ? `Codice errato. ${3 - S.otpAttempts} tentativo rimanente.`
+                      : `Wrong code. ${3 - S.otpAttempts} attempt(s) left.`;
+                addTalkLine("bot", m);
+                talkSpeak(m);
+              }
+            } catch (e) {
+              const m = `Verification error.`;
+              addTalkLine("bot", m);
+              talkSpeak(m);
+            }
+            return;
+          }
+        }
+
+        // Name collection
+        if (S.step === "collect_name") {
+          S.userName = text.trim().split(" ")[0];
+          const m =
+            lang === "it"
+              ? `Piacere ${S.userName}! Qual è il tuo cognome?`
+              : `Nice to meet you ${S.userName}! What's your last name?`;
+          addTalkLine("bot", m);
+          talkSpeak(m);
+          S.step = "collect_last";
+          return;
+        }
+        if (S.step === "collect_last") {
+          S.userLastName = text.trim();
+          enterFreeMode();
+          const m = lang==='it'
+            ? `Benvenuto ${S.userName} ${S.userLastName}! Come posso aiutarti? Posso prenotare un appuntamento, mostrarti i tuoi appuntamenti, o darti informazioni sui nostri dottori.`
+            : `Welcome ${S.userName} ${S.userLastName}! How can I help you? I can book an appointment, show your appointments, or tell you about our doctors.`;
+          addTalkLine('bot', m);
+          talkSpeak(m);
+          S.step = 'idle';
+          return;
+        }
+
+        // Booking sub-steps
+        if (S.step === "booking_for") {
+          const who = await extractForWho(text);
+          if (who === "other") {
+            S.forOther = true;
+            const m = lang==='it'
+              ? `Capito! Dimmi il nome del paziente.`
+              : `Got it! Please tell me the patient's first name.`;
+            addTalkLine('bot', m); talkSpeak(m);
+            S.step = 'collect_patient_name';
+          } else if (who === "self") {
+            S.forOther = false;
+            const m = lang==='it'
+              ? `Perfetto! Ora cerchiamo il dottore giusto per te.`
+              : `Great! Now let us find the right doctor for you.`;
+            addTalkLine('bot', m);
+            talkSpeak(m, async () => { await talkStartFindBy(); });
+          } else {
+            // unclear — ask again simply
+            const m = lang==='it'
+              ? `Scusa, non ho capito. Di' semplicemente "per me" o "per qualcun altro".`
+              : `Sorry, I did not catch that. Just say "for me" or "for someone else".`;
+            addTalkLine('bot', m); talkSpeak(m);
+            // stay on booking_for step
+          }
+          return;
+        }
+        if (S.step === "collect_patient_name") {
+          S.patName = text.trim();
+          const m = lang==='it'
+            ? `Grazie. E il cognome del paziente?`
+            : `Thank you. And the patient's last name?`;
+          addTalkLine('bot', m); talkSpeak(m);
+          S.step = 'collect_patient_last';
+          return;
+        }
+        if (S.step === "collect_patient_last") {
+          S.patLast = text.trim();
+          const m = lang==='it'
+            ? `Perfetto. Hai il numero di telefono del paziente?`
+            : `Perfect. Do you have the patient's phone number?`;
+          addTalkLine('bot', m); talkSpeak(m);
+          S.step = 'collect_patient_phone';
+          return;
+        }
+        if (S.step === "collect_patient_phone") {
+          const p = await extractPhone(text);
+          S.patPhone = p || text.trim();
+          const m = lang==='it'
+            ? `Perfetto. Ora cerchiamo il dottore per ${S.patName}.`
+            : `Perfect. Now let us find a doctor for ${S.patName}.`;
+          addTalkLine('bot', m);
+          talkSpeak(m, async () => { await talkStartFindBy(); });
+          return;
+        }
+
+        if (S.step === "find_by" || S.step === "match_doctor") {
+          setTalkSt(lang === "it" ? "Cerco..." : "Matching...", "thinking");
+          const match = await matchDoctorOrSpec(text);
+          if (match) {
+            await talkConfirmMatch(match);
+          } else {
+            const m =
+              lang === "it"
+                ? "Non ho trovato una corrispondenza. Puoi descrivere il tipo di dottore che cerchi?"
+                : "I could not find a match. Can you describe the type of doctor you need?";
+            addTalkLine("bot", m);
+            talkSpeak(m);
+            S.step = "match_doctor";
+          }
+          return;
+        }
+
+        if (S.step === "confirm_doctor") {
+          const ans = await extractConfirm(text);
+          if (ans === "yes") {
+            await talkAskDate();
+          } else if (ans === "no") {
+            await talkStartFindBy();
+          } else {
+            const m = lang === "it" ? "Sì o no?" : "Yes or no?";
+            addTalkLine("bot", m);
+            talkSpeak(m);
+          }
+          return;
+        }
+
+        if (S.step === "collect_date") {
+          const ds = await extractDate(text);
+          if (ds) {
+            S.prefDate = ds;
+            await talkLoadSlots(ds);
+          } else {
+            const m =
+              lang === "it"
+                ? 'Non ho capito la data. Prova con "prossimo lunedì" o "il prima possibile".'
+                : 'Did not catch the date. Try "next Monday" or "as soon as possible".';
+            addTalkLine("bot", m);
+            talkSpeak(m);
+          }
+          return;
+        }
+
+        if (S.step === "select_slot") {
+          // First: try to match a spoken time against available slots
+          const matchedSlot = await extractSpokenTime(text, S.slotOpts || []);
+          if(matchedSlot) {
+            S.slotId   = matchedSlot.id;
+            S.slotDate = matchedSlot.date;
+            S.slotTime = matchedSlot.time;
+            await talkConfirmSlot(matchedSlot);
+            return;
+          }
+          // Second: try date change
+          const ds = await extractDate(text);
+          if (ds) {
+            S.prefDate = ds;
+            await talkLoadSlots(ds);
+          } else {
+            // Could be "the first one", "morning", "afternoon" etc.
+            const slot = extractSlotByKeyword(text, S.slotOpts || []);
+            if(slot){
+              S.slotId   = slot.id;
+              S.slotDate = slot.date;
+              S.slotTime = slot.time;
+              await talkConfirmSlot(slot);
+            } else {
+              const m = lang==="it"
+                ? `Non ho capito. Dimmi un orario come "le 9 di mattina" oppure "il pomeriggio", o un altro giorno.`
+                : `I did not catch that. Say a time like "9 in the morning" or "afternoon", or tell me another day.`;
+              addTalkLine("bot", m);
+              talkSpeak(m);
+            }
+          }
+          return;
+        }
+
+        if (S.step === "confirm_booking") {
+          const ans = await extractConfirm(text);
+          if (ans === "yes") {
+            await talkDoBook();
+          } else if (ans === "no") {
+            S.step = "idle";
+            const m =
+              lang === "it" ? "Prenotazione annullata." : `Booking cancelled.`;
+            addTalkLine("bot", m);
+            talkSpeak(m);
+          } else {
+            const m =
+              lang === "it" ? "Confermi? Sì o no." : `Confirm? Yes or no.`;
+            addTalkLine("bot", m);
+            talkSpeak(m);
+          }
+          return;
+        }
+
+        // ── Free mode — use AI agent ──────────────────────────────────
+        setTalkSt(lang === "it" ? "Penso..." : "Thinking...", "thinking");
+        const ctx = talkHistory
+          .slice(-8)
+          .map((h) => `${h.role === "bot" ? "Assistant" : "User"}: ${h.text}`)
+          .join("\n");
+        const state = `User: ${S.userName || "unknown"} ${S.userLastName || ""}, verified: ${S.verified}, appts: ${S.appts.length}`;
+        const decision = await agentDecide(text, `${state}\n${ctx}`);
+        const reply =
+          decision.speak_reply || decision.reply || "I am here to help.";
+        addTalkLine("bot", reply);
+
+        if (decision.action === "resend_otp") {
+          talkSpeak(reply, async () => {
+            await doResendOTP();
+          });
+        } else if (decision.action === "filter_doctors") {
+          talkSpeak(reply, async () => {
+            await talkFilterDoctors(decision.filter_category || text);
+          });
+        } else if (decision.action === "show_doctors") {
+          talkSpeak(reply, async () => {
+            await talkShowDoctors();
+          });
+        } else if (
+          decision.action === "show_appointments" ||
+          decision.action === "show_appointments_cancel"
+        ) {
+          talkSpeak(reply, async () => {
+            await talkShowAppts();
+          });
+        } else if (decision.action === "start_booking") {
+          // Always ask "for who" before searching for doctor
+          const forWhoPrompt = lang==='it'
+            ? `Certo, prenotiamo un appuntamento! È per te o per qualcun altro?`
+            : `Sure, let us book an appointment! Is this for you or for someone else?`;
+          addTalkLine('bot', forWhoPrompt);
+          talkSpeak(forWhoPrompt);
+          S.step = 'booking_for';
+        } else if (decision.action === "end") {
+          talkSpeak(reply, () => setTimeout(endTalk, 1000));
+        } else talkSpeak(reply);
+      }
+
+      // ── Talk-specific helpers ─────────────────────────────────────────
+      async function talkAskForWho() {
+        const m = lang==='it'
+          ? `Prima di cercare il dottore, dimmi: l'appuntamento è per te personalmente, o lo stai prenotando per un'altra persona?`
+          : `Before we find a doctor, tell me: is this appointment for you personally, or are you booking it for someone else?`;
+        addTalkLine('bot', m);
+        talkSpeak(m);
+        S.step = 'booking_for';
+      }
+
+      async function talkStartFindBy() {
+        if (!S.doctors.length) {
+          try {
+            const d = await api("GET", "/api/ai/en/doctors");
+            S.doctors = d.doctors;
+            S.specs = d.specializations;
+          } catch (e) {}
+        }
+        const m =
+          lang === "it"
+            ? `Vuoi un dottore specifico o una specializzazione? Puoi dirmi anche solo cardiologo o dottore per bambini.`
+            : `Which doctor or specialisation? You can say something like cardiologist or children doctor.`;
+        addTalkLine("bot", m);
+        talkSpeak(m);
+        S.step = "find_by";
+      }
+
+      async function talkConfirmMatch(match) {
+        if (match.type === "doctor") {
+          const doc = S.doctors.find((d) => d.user_id === match.id);
+          if (!doc) {
+            const m = "Doctor not found.";
+            addTalkLine("bot", m);
+            talkSpeak(m);
+            return;
+          }
+          S.docId = doc.user_id;
+          S.docName = `${doc.doctor_title} ${doc.doctor_first_name} ${doc.doctor_last_name}`;
+          S.findBy = "doctor";
+          try {
+            const r = await api(
+              "GET",
+              `/api/ai/en/doctors/${doc.user_id}/specializations`,
+            );
+            if (r.success) {
+              S.specId = r.specialization.spec_id;
+              S.specName = r.specialization.spec_name;
+            }
+          } catch (e) {}
+          const m =
+            lang === "it"
+              ? `Ho trovato ${S.docName}, ${S.specName}. Procedo?`
+              : `Found ${S.docName}, ${S.specName}. Shall I continue?`;
+          addTalkLine("bot", m);
+          talkSpeak(m);
+          S.step = "confirm_doctor";
+        } else {
+          const sp = S.specs.find((s) => s.spec_id === match.id);
+          if (!sp) {
+            const m = "Specialisation not found.";
+            addTalkLine("bot", m);
+            talkSpeak(m);
+            return;
+          }
+          S.specId = sp.spec_id;
+          S.specName = sp.spec_name;
+          S.findBy = "specialization";
+          const m =
+            lang === "it"
+              ? `Trovato ${sp.spec_name}. Procedo?`
+              : `Found ${sp.spec_name}. Shall I continue?`;
+          addTalkLine("bot", m);
+          talkSpeak(m);
+          S.step = "confirm_doctor";
+        }
+      }
+
+      // Extract spoken time and match to a slot
+      async function extractSpokenTime(text, slots) {
+        if(!slots.length) return null;
+        const slotList = slots.slice(0,8).map((s,i) => `${i+1}. slot_id:${s.id} time:${s.time} date:${s.date}`).join('\n');
+        const sys = `User said a time preference. Match to one of these slots.
+Slots:\n${slotList}
+Rules:
+- "morning" / "mattina" / "9" / "9 o'clock" → earliest morning slot
+- "afternoon" / "pomeriggio" / "2" / "14" → earliest afternoon slot
+- "evening" / "sera" / "17" / "18" → latest slot
+- "first" / "primo" / "the first one" → slot 1
+- exact time like "9:30" or "14:00" → closest matching slot
+Return ONLY the slot_id number or NONE.`;
+        const r = await groq(M.nlp, sys, text, 15);
+        if(!r || r==='NONE') return null;
+        const id = parseInt(r.trim());
+        return slots.find(s => s.id === id) || null;
+      }
+
+      // Keyword-based slot matching (fast, no LLM)
+      function extractSlotByKeyword(text, slots) {
+        if(!slots.length) return null;
+        const t = text.toLowerCase();
+        const morning = slots.filter(s => s.time < '12:00:00');
+        const aftn    = slots.filter(s => s.time >= '12:00:00' && s.time < '17:00:00');
+        const evening = slots.filter(s => s.time >= '17:00:00');
+        if(/morning|mattina|presto|early|first/i.test(t)) return morning[0] || slots[0];
+        if(/afternoon|pomeriggio|lunch|pranzo/i.test(t)) return aftn[0] || null;
+        if(/evening|sera|late|tardi/i.test(t)) return evening[0] || aftn[aftn.length-1] || null;
+        if(/first|primo|prima|uno|1/i.test(t)) return slots[0];
+        if(/second|secondo|due|2/i.test(t)) return slots[1] || slots[0];
+        if(/third|terzo|tre|3/i.test(t)) return slots[2] || slots[0];
+        return null;
+      }
+
+      // Show confirmation of chosen slot before booking
+      async function talkConfirmSlot(slot) {
+        function verbalTime2(t) {
+          const [hh, mm] = t.substring(0,5).split(':').map(Number);
+          const period = hh < 12 ? (lang==='it'?'di mattina':'in the morning')
+                       : hh < 17 ? (lang==='it'?'del pomeriggio':'in the afternoon')
+                       : (lang==='it'?'di sera':'in the evening');
+          const h12 = hh > 12 ? hh - 12 : hh === 0 ? 12 : hh;
+          if(mm===0) return lang==='it' ? `le ${hh} ${period}` : `${h12} ${period}`;
+          return lang==='it' ? `le ${hh} e ${mm} ${period}` : `${h12} ${mm} ${period}`;
+        }
+        const timeVerbal = verbalTime2(slot.time);
+        const dateVerbal = fmtDate(slot.date);
+        const m = lang==='it'
+          ? `Perfetto. Ho selezionato ${dateVerbal} ${timeVerbal} con ${S.docName}. Confermo la prenotazione?`
+          : `Great. I have selected ${dateVerbal} ${timeVerbal} with ${S.docName}. Shall I confirm the booking?`;
+        addTalkLine('bot', m);
+        talkSpeak(m);
+        S.step = 'confirm_booking';
+      }
+
+      async function talkAskDate() {
+        const m =
+          lang === "it"
+            ? 'Che data preferisci? Puoi dire "prossimo lunedì", "il prima possibile" o una data specifica.'
+            : 'What date do you prefer? You can say "next Monday", "as soon as possible", or a specific date.';
+        addTalkLine("bot", m);
+        talkSpeak(m);
+        S.step = "collect_date";
+      }
+
+      async function talkLoadSlots(ds) {
+        setTalkSt(
+          lang === "it" ? "Cerco disponibilità..." : "Finding slots...",
+          "thinking",
+        );
+        try {
+          const data = await api("POST", "/api/ai/en/calendars", {
+            find_by: S.findBy,
+            doctor_user_id: S.docId,
+            specialization_id: String(S.specId),
+          });
+          const rows = data["0"].slot_rows,
+            dates = Object.keys(rows).sort();
+          const opts = [];
+          let used = null;
+          if (rows[ds]?.length > 0) {
+            used = ds;
+            rows[ds].forEach((s) =>
+              opts.push({ id: s.slot_id, date: ds, time: s.slot_time }),
+            );
+          } else {
+            for (const d of dates) {
+              if (d <= ds) continue;
+              if (rows[d]?.length > 0) {
+                used = d;
+                rows[d].forEach((s) =>
+                  opts.push({ id: s.slot_id, date: d, time: s.slot_time }),
+                );
+                break;
+              }
+            }
+          }
+          if (!opts.length) {
+            const m =
+              lang === "it"
+                ? `Nessuno slot disponibile. Prova un'altra data.`
+                : `No slots available. Try another date.`;
+            addTalkLine("bot", m);
+            talkSpeak(m);
+            S.step = "collect_date";
+            return;
+          }
+          S.slotOpts = opts;
+          // Pick up to 3 sample slots spread across the day for verbal presentation
+          const morning = opts.filter((o) => o.time < "12:00:00").slice(0, 2);
+          const aftn    = opts.filter((o) => o.time >= "12:00:00" && o.time < "17:00:00").slice(0, 1);
+          const sample  = [...morning, ...aftn].slice(0, 3);
+          if(!sample.length) sample.push(opts[0]); // fallback
+          // Store first as default in case user just says "yes" or "first one"
+          S.slotId   = sample[0].id;
+          S.slotDate = sample[0].date;
+          S.slotTime = sample[0].time;
+          // Build verbal time descriptions — NO numbers that sound like currency
+          function verbalTime(t) {
+            const [hh, mm] = t.substring(0,5).split(':').map(Number);
+            const period = hh < 12 ? (lang==='it'?'di mattina':'in the morning')
+                         : hh < 17 ? (lang==='it'?'del pomeriggio':'in the afternoon')
+                         : (lang==='it'?'di sera':'in the evening');
+            const h12   = hh > 12 ? hh - 12 : hh === 0 ? 12 : hh;
+            if(mm === 0) return lang==='it' ? `le ${hh} ${period}` : `${h12} ${period}`;
+            return lang==='it' ? `le ${hh} e ${mm} ${period}` : `${h12} ${mm} ${period}`;
+          }
+          const dateLabel   = fmtDate(used);
+          const timeSamples = sample.map((s) => verbalTime(s.time)).join(lang==='it'?' oppure ':' or ');
+          const prefix = used !== ds
+            ? (lang==='it' ? `Non ho slot per quella data, ma ho disponibilità il ${dateLabel}. ` : `No slots on your date but I have availability on ${dateLabel}. `)
+            : '';
+          const m = lang==='it'
+            ? `${prefix}Ho questi orari disponibili: ${timeSamples}. Quale preferisci? Puoi anche chiedermi un altro giorno.`
+            : `${prefix}I have these times available: ${timeSamples}. Which one would you like? You can also ask for a different day.`;
+          addTalkLine("bot", m);
+          talkSpeak(m);
+          S.step = "select_slot";
+          // Also show full slot grid in chat tab
+          addMsg(buildSlotsHtml(opts, used), "bot", true);
+        } catch (e) {
+          const m = "Error loading calendar.";
+          addTalkLine("bot", m);
+          talkSpeak(m);
+        }
+      }
+
+      function buildSlotsHtml(opts, used) {
+        const morning = opts.filter((o) => o.time < "12:00:00"),
+          aftn = opts.filter((o) => o.time >= "12:00:00");
+        const dl = fmtDate(used);
+        let html = `<div class="slots-hdr">📅 ${used} · ${dl}</div>`;
+        if (morning.length) {
+          html += `<div class="period-lbl">${lang === "it" ? "🌅 Mattina" : "🌅 Morning"}</div><div class="slots-grid">`;
+          morning.forEach((o) => {
+            html += `<button class="slot-chip" data-slot-id="${o.id}" data-date="${o.date}" data-time="${o.time}">🕐 ${o.time.substring(0, 5)}</button>`;
+          });
+          html += `</div>`;
+        }
+        if (aftn.length) {
+          html += `<div class="period-lbl">${lang === "it" ? "🌆 Pomeriggio" : "🌆 Afternoon"}</div><div class="slots-grid">`;
+          aftn.forEach((o) => {
+            html += `<button class="slot-chip" data-slot-id="${o.id}" data-date="${o.date}" data-time="${o.time}">🕐 ${o.time.substring(0, 5)}</button>`;
+          });
+          html += `</div>`;
+        }
+        return html;
+      }
+
+      async function talkDoBook() {
+        setTalkSt(lang === "it" ? "Prenoto..." : "Booking...", "thinking");
+        const s = S;
+        const payload = {
+          slot_id: s.slotId,
+          user_email: s.userEmail || `${s.userName.toLowerCase()}@temp.com`,
+          user_first_name: s.userName,
+          user_last_name: s.userLastName,
+          user_gender: "Unknown",
+          user_phone: s.phone,
+          booking_for: s.forOther,
+          ...(s.forOther && {
+            patient_name: s.patName,
+            patient_surname: s.patLast,
+            patient_phone: s.patPhone,
+          }),
+        };
+        try {
+          const r = await api("POST", "/api/ai/en/appointments", payload);
+          if (r.success) {
+            const m =
+              lang === "it"
+                ? `Prenotazione confermata! ${s.specName} con ${s.docName} il ${fmtDate(r.appointment.appt_date)}.`
+                : `Booking confirmed! ${s.specName} with ${s.docName} on ${fmtDate(r.appointment.appt_date)}.`;
+            addTalkLine("bot", m);
+            talkSpeak(m);
+            S.step = "idle";
+          } else {
+            const m =
+              lang === "it" ? "Prenotazione fallita." : `Booking failed.`;
+            addTalkLine("bot", m);
+            talkSpeak(m);
+          }
+        } catch (e) {
+          const m = `Network error.`;
+          addTalkLine("bot", m);
+          talkSpeak(m);
+        }
+      }
+
+      async function talkShowAppts() {
+        try {
+          const d = await api(
+            "GET",
+            `/api/ai/en/appointments/patient/${encodeURIComponent(S.userEmail || S.phone)}`,
+          );
+          const up = (d.appointments || []).filter(
+            (a) => a.appt_date >= todayStr(),
+          );
+          S.appts = up;
+          if (!up.length) {
+            const m =
+              lang === "it"
+                ? "Non hai appuntamenti futuri."
+                : `You have no upcoming appointments.`;
+            addTalkLine("bot", m);
+            talkSpeak(m);
+            return;
+          }
+          const names = up
+            .slice(0, 3)
+            .map((a) => {
+              const doc = S.doctors.find((d) => d.user_id === a.doctor_user_id);
+              return `${a.appt_date} ${lang === "it" ? "con" : "with"} ${doc ? `${doc.doctor_title} ${doc.doctor_last_name}` : ""}`;
+            })
+            .join(", ");
+          const m =
+            lang === "it"
+              ? `Hai ${up.length} appuntamento${up.length > 1 ? "i" : ""}: ${names}.`
+              : `You have ${up.length} appointment${up.length > 1 ? "s" : ""}: ${names}.`;
+          addTalkLine("bot", m);
+          talkSpeak(m);
+          // Also show in chat tab
+          addMsg(buildApptCards(up), "bot", true);
+        } catch (e) {
+          const m = `Could not load appointments.`;
+          addTalkLine("bot", m);
+          talkSpeak(m);
+        }
+      }
+
+      async function talkFilterDoctors(category) {
+        if (!S.doctors.length) {
+          try {
+            const d = await api("GET", "/api/ai/en/doctors");
+            S.doctors = d.doctors;
+            S.specs = d.specializations;
+          } catch (e) {}
+        }
+        const match = await matchDoctorOrSpec(category);
+        let names = S.doctors
+          .slice(0, 4)
+          .map((d) => `${d.doctor_title} ${d.doctor_last_name}`)
+          .join(", ");
+        if (match?.type === "spec") {
+          const sp = S.specs.find((s) => s.spec_id === match.id);
+          if (sp) {
+            names = S.doctors
+              .map(
+                (d) =>
+                  `${d.doctor_title} ${d.doctor_first_name} ${d.doctor_last_name}`,
+              )
+              .slice(0, 5)
+              .join(", ");
+          }
+        }
+        const m =
+          lang === "it"
+            ? `I nostri dottori includono: ${names}. Vuoi prenotare con uno di loro?`
+            : `Our doctors include: ${names}. Would you like to book with one of them?`;
+        addTalkLine("bot", m);
+        talkSpeak(m);
+        addMsg(buildDoctorsList(), "bot", true);
+      }
+
+      async function talkShowDoctors() {
+        if (!S.doctors.length) {
+          try {
+            const d = await api("GET", "/api/ai/en/doctors");
+            S.doctors = d.doctors;
+            S.specs = d.specializations;
+          } catch (e) {}
+        }
+        const names = S.doctors
+          .slice(0, 4)
+          .map((d) => `${d.doctor_title} ${d.doctor_last_name}`)
+          .join(", ");
+        const m =
+          lang === "it"
+            ? `Abbiamo ${S.doctors.length} dottori, tra cui ${names}.`
+            : `We have ${S.doctors.length} doctors including ${names}.`;
+        addTalkLine("bot", m);
+        talkSpeak(m);
+        addMsg(buildDoctorsList(), "bot", true);
+      }
+
+      function buildDoctorsList() {
+        return `<div class="info-title">${lang === "it" ? `👨‍⚕️ Dottori (${S.doctors.length})` : `👨‍⚕️ Doctors (${S.doctors.length})`}</div><div class="info-list">${S.doctors.map((d) => `<div class="info-item">${d.doctor_title} ${d.doctor_first_name} ${d.doctor_last_name}</div>`).join("")}</div>`;
+      }
+
+      // Handle user selecting a slot verbally in talk mode
+      // Override onend to also check if user said a time like "9 o'clock"
+      const _origSelectSlot = window.pickSlot;
+
+      async function startTalk() {
+        if (location.protocol === "file:") {
+          setTalkSt(
+            "⚠️ Serve localhost — run: python -m http.server 8080",
+            "ended",
+          );
+          const el = document.getElementById("talkSt");
+          el.style.fontSize = "11px";
+          el.style.textAlign = "center";
+          el.style.padding = "0 20px";
+          return;
+        }
+        const ok = await requestMicOnce();
+        if (!ok) {
+          setTalkSt(
+            lang === "it"
+              ? "Microfono negato. Clicca sul lucchetto nella barra del browser e consenti il microfono."
+              : "Mic denied. Click the lock icon in the browser bar and allow microphone access.",
+            "ended",
+          );
+          document.getElementById("talkSt").style.fontSize = "11px";
+          return;
+        }
+        initTalkRecog();
+        talkActive = true;
+        talkHistory = [];
+        transcriptEl.innerHTML = "";
+        ctrlIdle.style.display = "none";
+        ctrlLive.style.display = "flex";
+        talkTimerEl.style.display = "block";
+        talkSecs = 0;
+        talkTimerInt = setInterval(() => {
+          talkSecs++;
+          talkTimerEl.textContent = `${String(Math.floor(talkSecs / 60)).padStart(2, "0")}:${String(talkSecs % 60).padStart(2, "0")}`;
+        }, 1000);
+        talkAvEl.classList.add("ring");
+        setTalkSt(l("connecting"), "connecting");
+        window.speechSynthesis.onvoiceschanged = () => {};
+        talkAvEl.classList.remove("ring");
+        setTalkSt(l("connected"), "live");
+
+        // Speak greeting then wait for user — voices must be loaded first
+        function doGreet() {
+          const greet = S.userName
+            ? lang === "it"
+              ? `Ciao ${S.userName}! Come posso aiutarti oggi?`
+              : `Hello ${S.userName}! How can I help you today?`
+            : lang === "it"
+              ? "Benvenuto alla NCM. Sono il tuo assistente medico. Dimmi il tuo numero di cellulare con prefisso, per esempio più 39 seguito dalle cifre."
+              : "Welcome to NCM. I am your medical assistant. Please say your mobile phone number with country code, for example plus 39 then your number.";
+          addTalkLine("bot", greet);
+          talkSpeak(greet); // after speaking, afterTalkSpeak → startTalkListen automatically
+        }
+
+        const voices = window.speechSynthesis.getVoices();
+        if (voices.length > 0) {
+          setTimeout(doGreet, 600);
+        } else {
+          // Chrome loads voices async
+          window.speechSynthesis.onvoiceschanged = () => {
+            setTimeout(doGreet, 600);
+          };
+          setTimeout(doGreet, 2500); // hard fallback
+        }
+      }
+
+      function endTalk() {
+        talkActive = false;
+        try {
+          if (talkRecog && isListening) talkRecog.stop();
+        } catch (e) {}
+        window.speechSynthesis.cancel();
+        clearInterval(talkTimerInt);
+        isListening = false;
+        isSpeaking = false;
+        _listenRetries = 0;
+        showWave(false);
+        const dur = talkTimerEl.textContent;
+        ctrlIdle.style.display = "flex";
+        ctrlLive.style.display = "none";
+        talkTimerEl.style.display = "none";
+        addTalkLine(
+          "bot",
+          lang === "it"
+            ? `Chiamata terminata. Durata: ${dur}`
+            : `Talk ended. Duration: ${dur}`,
+        );
+        setTalkSt(`${lang === "it" ? "Terminato" : "Ended"} · ${dur}`, "ended");
+      }
+
+      function toggleMute() {
+        talkMuted = !talkMuted;
+        document.getElementById("muteBtn").textContent = talkMuted
+          ? "🔇"
+          : "🎙️";
+        document.getElementById("muteBtn").classList.toggle("muted", talkMuted);
+        document.getElementById("muteLbl").textContent = talkMuted
+          ? l("unmuteLbl")
+          : l("muteLbl");
+        if (talkMuted) {
+          talkRecog?.stop();
+          window.speechSynthesis.cancel();
+          showWave(false);
+          setTalkSt(l("muted"), "idle");
+        } else startTalkListen();
+      }
+
+      function toggleSpk() {
+        spkOn = !spkOn;
+        document.getElementById("spkBtn").textContent = spkOn ? "🔊" : "🔈";
+        document.getElementById("spkBtn").classList.toggle("spk-off", !spkOn);
+        document.getElementById("spkLbl").textContent = spkOn
+          ? l("spkLbl")
+          : l("spkOffLbl");
+        if (!spkOn) window.speechSynthesis.cancel();
+      }
+
+      function switchTab(tab) {
+        document
+          .getElementById("chatPane")
+          .classList.toggle("hidden", tab === "talk");
+        document
+          .getElementById("talkPane")
+          .classList.toggle("show", tab === "talk");
+        document
+          .getElementById("tabChat")
+          .classList.toggle("active", tab === "chat");
+        document
+          .getElementById("tabTalk")
+          .classList.toggle("active", tab === "talk");
+      }
+
+      // ── Send ─────────────────────────────────────────────────────────
+      function doSend() {
+        const tx = inp.value.trim();
+        if (!tx || inp.disabled) return;
+        inp.value = "";
+        handleInput(tx);
+      }
+      document.getElementById("sendBtn").onclick = doSend;
+      inp.onkeydown = (e) => {
+        if (e.key === "Enter") doSend();
+      };
+
+      // Enter free mode after lastname collected
+      const _origHandleInput = handleInput;
+      window.handleInput = async function (text) {
+        await _origHandleInput(text);
+        if (!S.freeMode && S.verified && S.userName && S.userLastName)
+          enterFreeMode();
+      };
+
+      // Request mic permission on first click anywhere (not repeatedly)
+      document.addEventListener(
+        "click",
+        () => {
+          if (!micPermGranted) requestMicOnce();
+        },
+        { once: true },
+      );
+
+      window.speechSynthesis.onvoiceschanged = () =>
+        window.speechSynthesis.getVoices();
+      setEnabled(false);
+      start();
+    </script>
+  </body>
+</html>
